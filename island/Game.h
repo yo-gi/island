@@ -27,6 +27,7 @@ public:
 	void destroyEntity(int i);
 
 	void createHero();
+<<<<<<< HEAD
 	void createTree(int x, int y);
 
 	void movementSystem();
@@ -34,10 +35,27 @@ public:
 	void updateCamera(SDL_Rect& camera);
 	void centerCamera(int componentIndex, SDL_Rect& camera);
 	void eventHandler(SDL_Event& event);
+=======
+		
+	void movementSystem();
+	void animationSystem();
+	void updateCamera(SDL_Rect& camera);
+
+	//Event handling
+	void eventHandler(SDL_Event& event);
+	void mouseHandler();
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 
 private:
 
 	Texture tileTexture;
+<<<<<<< HEAD
+=======
+	Sprite mouseSprite;
+
+	Tile* sector[MAX_TILES];
+	SDL_Rect tileClips[MAX_TILE_TYPES];
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 
 	std::vector<int> componentMasks;
 	std::vector<SDL_Point> componentPositions;
@@ -46,6 +64,7 @@ private:
 	std::vector<Sprite> componentSprites;
 
 	int heroNum;
+<<<<<<< HEAD
 	std::vector<int> treeNums;
 	
 	int cameraVelX;
@@ -54,5 +73,17 @@ private:
 	Tile* sector[MAX_TILES];
 	SDL_Rect tileClips[MAX_TILE_TYPES];
 	bool collisionChecker(int x, int y);
+=======
+	int mouseNum;
+
+	int cameraVelX;
+	int cameraVelY;
+
+
+	int mouseX;
+	int mouseY;
+
+
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 };
 

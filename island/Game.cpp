@@ -18,8 +18,12 @@ Game::Game()
 	}
 
 	heroNum = 0;
+<<<<<<< HEAD
 	treeNums.push_back(1);
 	treeNums.push_back(2);
+=======
+	mouseNum = 0;
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 
 	cameraVelX = 0;
 	cameraVelY = 0;
@@ -33,6 +37,12 @@ Game::Game()
 	camera.x = 0;
 	camera.y = 0;
 
+<<<<<<< HEAD
+=======
+	mouseX = 0;
+	mouseY = 0;
+
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 }
 
 Game::~Game()
@@ -53,7 +63,11 @@ bool Game::initialize()
 		cout << "Render scale quality not set" << "\n";
 	}
 
+<<<<<<< HEAD
 	mainWindow = SDL_CreateWindow("r/trees", 
+=======
+	mainWindow = SDL_CreateWindow("island", 
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 		SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
@@ -79,6 +93,14 @@ bool Game::initialize()
 		return false;
 	}
 
+<<<<<<< HEAD
+=======
+	loadRandomSector();
+	loadTileClips();
+
+	SDL_SetRelativeMouseMode((SDL_bool)true);
+
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 	return true;
 }
 
@@ -90,6 +112,15 @@ bool Game::loadMedia()
 		return false;
 	}
 
+<<<<<<< HEAD
+=======
+	if (!mouseSprite.initialize("images/cursor.png", 32, 32, 1, 1))
+	{
+		cout << "Couldn't load mouse texture\n";
+		return false;
+	}
+
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 	return true;
 }
 
@@ -208,10 +239,16 @@ void Game::destroyEntity(int i)
 
 void Game::eventHandler(SDL_Event& event)
 {
+<<<<<<< HEAD
+=======
+	mouseHandler();
+
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 	if (event.type == SDL_KEYDOWN && event.key.repeat == 0)
 	{
 		switch(event.key.keysym.sym)
 		{
+<<<<<<< HEAD
 			/*case SDLK_UP:
 				cameraVelY -= CAMERA_VEL;
 				break;
@@ -270,6 +307,19 @@ void Game::eventHandler(SDL_Event& event)
 				break;
 			case SDLK_c:
 				centerCamera(heroNum, camera);
+=======
+			case SDLK_w:
+				componentCoordinates[heroNum].y -= HERO_VEL;
+				break;
+			case SDLK_s:
+				componentCoordinates[heroNum].y += HERO_VEL;
+				break;
+			case SDLK_a:
+				componentCoordinates[heroNum].x -= HERO_VEL;
+				break;
+			case SDLK_d:
+				componentCoordinates[heroNum].x += HERO_VEL;
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 				break;
 			}
 	}
@@ -277,6 +327,7 @@ void Game::eventHandler(SDL_Event& event)
 	{
 		switch(event.key.keysym.sym)
 		{
+<<<<<<< HEAD
 			/*case SDLK_w:
 				if(componentCoordinates[heroNum].y == 7)
 				{
@@ -338,6 +389,44 @@ void Game::centerCamera(int componentIndex, SDL_Rect& camera)
 	camera.y = componentCoordinates[componentIndex].y*TILE_WIDTH
 	+ TILE_WIDTH/2 - SCREEN_HEIGHT/2;
 
+=======
+
+		}
+	}
+
+
+	if (componentCoordinates[heroNum].x < 0) 
+		componentCoordinates[heroNum].x += HERO_VEL;
+
+	if (componentCoordinates[heroNum].x > LEVEL_WIDTH - 1) 
+		componentCoordinates[heroNum].x -= HERO_VEL;
+	
+	if (componentCoordinates[heroNum].y < 0) 
+		componentCoordinates[heroNum].y += HERO_VEL;
+	
+	if (componentCoordinates[heroNum].y > LEVEL_HEIGHT - 1) 
+		componentCoordinates[heroNum].y -= HERO_VEL;
+
+	//cout << componentCoordinates[heroNum].x << ", " << componentCoordinates[heroNum].y << endl;
+	cout << mouseX << ", " << mouseY << endl;
+}
+
+void Game::mouseHandler()
+{
+	SDL_GetMouseState(&mouseX, &mouseY);
+}
+
+void Game::updateCamera(SDL_Rect& camera)
+{
+
+	if (mouseX < 10) 				camera.x -= CAMERA_VEL;
+	if (mouseX > SCREEN_WIDTH - 10) camera.x += CAMERA_VEL;
+	if (mouseY < 10) 				camera.y -= CAMERA_VEL;
+	if (mouseY > SCREEN_HEIGHT - 10) camera.y += CAMERA_VEL;
+
+	if (camera.x < 0) camera.x = 0;
+	if (camera.y < 0) camera.y = 0;
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 	if (camera.x + SCREEN_WIDTH > (LEVEL_WIDTH * TILE_WIDTH))
 	{
 		camera.x = (LEVEL_WIDTH * TILE_WIDTH) - SCREEN_WIDTH;
@@ -347,8 +436,12 @@ void Game::centerCamera(int componentIndex, SDL_Rect& camera)
 		camera.y = (LEVEL_HEIGHT * TILE_WIDTH) - SCREEN_HEIGHT;
 	}
 
+<<<<<<< HEAD
 	if (camera.x < 0) camera.x = 0;
 	if (camera.y < 0) camera.y = 0;
+=======
+
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 }
 
 void Game::createHero()
@@ -366,6 +459,7 @@ void Game::createHero()
 	componentVelocities[heroNum].x = 0;
 	componentVelocities[heroNum].y = 0;
 	
+<<<<<<< HEAD
 	componentSprites[heroNum].initialize("images/hero.png", 
 		32, 32, 1, 1);
 }
@@ -386,6 +480,10 @@ void Game::createTree(int x, int y)
 	componentVelocities[treeNums.back()].y = 0;
 	
 	componentSprites[treeNums.back()].initialize("images/tree.png", 
+=======
+	
+	componentSprites[heroNum].initialize("images/hero.png", 
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 		32, 32, 1, 1);
 }
 
@@ -427,6 +525,7 @@ void Game::animationSystem()
 				componentPositions[i].y - camera.y);
 		}
 	}
+<<<<<<< HEAD
 }
 
 bool Game::collisionChecker(int x, int y)
@@ -439,4 +538,9 @@ bool Game::collisionChecker(int x, int y)
 		}
 	}
 	return false;
+=======
+
+	mouseSprite.animate(mouseX, mouseY);
+
+>>>>>>> 8ed56953ad5890faa096d84d901d756093b2527b
 }

@@ -20,6 +20,7 @@ public:
 
 	int getWidth();
 	int getHeight();
+	SDL_Rect getBox();
 
 private:
 	Texture baseTexture;

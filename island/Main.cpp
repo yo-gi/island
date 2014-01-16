@@ -29,19 +29,6 @@ int main (int argc, char* args[]) {
 	}
 	SDL_SetRenderTarget(mainRenderer, NULL);
 
-	/*
-	if (!game.loadSector(1))
-	{
-		cout << "Game couldn't load sector 1\n";
-		return 1;
-	}
-	*/
-	game.loadRandomSector();
-
-	game.loadTileClips();
-	
-
-
 	game.createHero();
 
 	bool quit = false;
@@ -56,12 +43,19 @@ int main (int argc, char* args[]) {
 				case SDL_QUIT:
 					quit = true;
 					break;
+				case SDL_KEYDOWN:
+					switch(event.key.keysym.sym)
+					{
+						case SDLK_ESCAPE:
+							quit = true;
+							break;
+					}
 			}
 
 			game.eventHandler(event);
 		}
 
-		game.centerCamera(camera);
+		game.updateCamera(camera);
 
 
 		SDL_RenderClear(mainRenderer);
@@ -75,8 +69,6 @@ int main (int argc, char* args[]) {
 	}
 
 	game.destruct();
-
-
 	return 0;
 }
 

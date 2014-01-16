@@ -27,15 +27,22 @@ public:
 	void destroyEntity(int i);
 
 	void createHero();
-	
+		
 	void movementSystem();
 	void animationSystem();
-	void centerCamera(SDL_Rect& camera);
+	void updateCamera(SDL_Rect& camera);
+
+	//Event handling
 	void eventHandler(SDL_Event& event);
+	void mouseHandler();
 
 private:
 
 	Texture tileTexture;
+	Sprite mouseSprite;
+
+	Tile* sector[MAX_TILES];
+	SDL_Rect tileClips[MAX_TILE_TYPES];
 
 	std::vector<int> componentMasks;
 	std::vector<SDL_Point> componentPositions;
@@ -44,12 +51,15 @@ private:
 	std::vector<Sprite> componentSprites;
 
 	int heroNum;
+	int mouseNum;
 
 	int cameraVelX;
 	int cameraVelY;
 
-	Tile* sector[MAX_TILES];
-	SDL_Rect tileClips[MAX_TILE_TYPES];
+
+	int mouseX;
+	int mouseY;
+
 
 };
 

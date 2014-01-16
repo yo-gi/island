@@ -18,6 +18,8 @@ Game::Game()
 	}
 
 	heroNum = 0;
+	mouseNum = 0;
+
 	cameraVelX = 0;
 	cameraVelY = 0;
 
@@ -29,6 +31,9 @@ Game::Game()
 
 	camera.x = 0;
 	camera.y = 0;
+
+	mouseX = 0;
+	mouseY = 0;
 
 }
 
@@ -50,7 +55,7 @@ bool Game::initialize()
 		cout << "Render scale quality not set" << "\n";
 	}
 
-	mainWindow = SDL_CreateWindow("plastic_jungle", 
+	mainWindow = SDL_CreateWindow("island", 
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 		SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
@@ -76,6 +81,11 @@ bool Game::initialize()
 		return false;
 	}
 
+	loadRandomSector();
+	loadTileClips();
+
+	SDL_SetRelativeMouseMode((SDL_bool)true);
+
 	return true;
 }
 
@@ -84,6 +94,12 @@ bool Game::loadMedia()
 	if (!tileTexture.loadFrom("images/texture.png"))
 	{
 		cout << "Couldn't load tile texture\n";
+		return false;
+	}
+
+	if (!mouseSprite.initialize("images/cursor.png", 32, 32, 1, 1))
+	{
+		cout << "Couldn't load mouse texture\n";
 		return false;
 	}
 
@@ -205,22 +221,12 @@ void Game::destroyEntity(int i)
 
 void Game::eventHandler(SDL_Event& event)
 {
+	mouseHandler();
+
 	if (event.type == SDL_KEYDOWN && event.key.repeat == 0)
 	{
 		switch(event.key.keysym.sym)
 		{
-			case SDLK_UP:
-				cameraVelY -= CAMERA_VEL;
-				break;
-			case SDLK_DOWN:
-				cameraVelY += CAMERA_VEL;
-				break;
-			case SDLK_LEFT:
-				cameraVelX -= CAMERA_VEL;
-				break;
-			case SDLK_RIGHT:
-				cameraVelX += CAMERA_VEL;
-				break;
 			case SDLK_w:
 				componentCoordinates[heroNum].y -= HERO_VEL;
 				break;
@@ -239,46 +245,52 @@ void Game::eventHandler(SDL_Event& event)
 	{
 		switch(event.key.keysym.sym)
 		{
-			case SDLK_UP:
-				cameraVelY += CAMERA_VEL;
-				break;
-			case SDLK_DOWN:
-				cameraVelY -= CAMERA_VEL;
-				break;
-			case SDLK_LEFT:
-				cameraVelX += CAMERA_VEL;
-				break;
-			case SDLK_RIGHT:
-				cameraVelX -= CAMERA_VEL;
-				break;
+
 		}
 	}
 
-	if (componentCoordinates[heroNum].x < 0) componentCoordinates[heroNum].x += HERO_VEL;
-	if (componentCoordinates[heroNum].x > LEVEL_WIDTH - 1) componentCoordinates[heroNum].x -= HERO_VEL;
-	if (componentCoordinates[heroNum].y < 0) componentCoordinates[heroNum].y += HERO_VEL;
-	if (componentCoordinates[heroNum].y > LEVEL_HEIGHT - 1) componentCoordinates[heroNum].y -= HERO_VEL;
 
-	cout << componentCoordinates[heroNum].x << ", " << componentCoordinates[heroNum].y << endl;
+	if (componentCoordinates[heroNum].x < 0) 
+		componentCoordinates[heroNum].x += HERO_VEL;
+
+	if (componentCoordinates[heroNum].x > LEVEL_WIDTH - 1) 
+		componentCoordinates[heroNum].x -= HERO_VEL;
+	
+	if (componentCoordinates[heroNum].y < 0) 
+		componentCoordinates[heroNum].y += HERO_VEL;
+	
+	if (componentCoordinates[heroNum].y > LEVEL_HEIGHT - 1) 
+		componentCoordinates[heroNum].y -= HERO_VEL;
+
+	//cout << componentCoordinates[heroNum].x << ", " << componentCoordinates[heroNum].y << endl;
+	cout << mouseX << ", " << mouseY << endl;
 }
 
-void Game::centerCamera(SDL_Rect& camera)
+void Game::mouseHandler()
 {
-	camera.x += cameraVelX;
-	camera.y += cameraVelY;
+	SDL_GetMouseState(&mouseX, &mouseY);
+}
 
+void Game::updateCamera(SDL_Rect& camera)
+{
+
+	if (mouseX < 10) 				camera.x -= CAMERA_VEL;
+	if (mouseX > SCREEN_WIDTH - 10) camera.x += CAMERA_VEL;
+	if (mouseY < 10) 				camera.y -= CAMERA_VEL;
+	if (mouseY > SCREEN_HEIGHT - 10) camera.y += CAMERA_VEL;
+
+	if (camera.x < 0) camera.x = 0;
+	if (camera.y < 0) camera.y = 0;
 	if (camera.x + SCREEN_WIDTH > (LEVEL_WIDTH * TILE_WIDTH))
 	{
 		camera.x = (LEVEL_WIDTH * TILE_WIDTH) - SCREEN_WIDTH;
 	}
-
 	if (camera.y + SCREEN_HEIGHT > (LEVEL_HEIGHT * TILE_WIDTH))
 	{
 		camera.y = (LEVEL_HEIGHT * TILE_WIDTH) - SCREEN_HEIGHT;
 	}
 
-	if (camera.x < 0) camera.x = 0;
-	if (camera.y < 0) camera.y = 0;
+
 }
 
 void Game::createHero()
@@ -339,4 +351,7 @@ void Game::animationSystem()
 				componentPositions[i].y - camera.y);
 		}
 	}
+
+	mouseSprite.animate(mouseX, mouseY);
+
 }

@@ -56,3 +56,8 @@ int Sprite::getHeight()
 {
 	return frame.h;
 }
+
+SDL_Rect Sprite::getBox()
+{
+	return frame;
+}

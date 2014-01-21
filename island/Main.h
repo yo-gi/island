@@ -12,8 +12,8 @@
 
 const int MAX_ENTITIES = 50;
 
-const int LEVEL_WIDTH = 32;
-const int LEVEL_HEIGHT = 32;
+const int LEVEL_WIDTH = 16;
+const int LEVEL_HEIGHT = 16;
 const int MAX_TILE_TYPES = 2;
 const int MAX_TILES = LEVEL_HEIGHT * LEVEL_WIDTH;
 
@@ -41,6 +41,19 @@ typedef enum
 	COMPONENT_SPRITE = 1 << 2
 } Component;
 
+typedef enum
+{
+	HERO,
+	TREE,
+	NONE
+} entityType;
+
 const int MOVEMENT_MASK = (COMPONENT_POSITION | COMPONENT_VELOCITY);
 
 bool checkCollision(SDL_Rect one, SDL_Rect two);
+
+struct entityData
+{
+	int index;
+	entityType type;
+};

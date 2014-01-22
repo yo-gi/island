@@ -12,6 +12,7 @@ Game::Game()
 	componentSprites.resize(MAX_ENTITIES);
 	componentPositions.resize(MAX_ENTITIES);
 	componentCoordinates.resize(MAX_ENTITIES);
+
 	for (auto i : componentMasks)
 	{
 		i = COMPONENT_NONE;
@@ -170,12 +171,7 @@ void Game::loadTileClips()
 
 void Game::reloadBackground()
 {
-	/*
-	if (!background.loadRandomColor())
-	{
-		cout << "Couldn't load background texture\n";
-	}
-	*/
+
 }
 
 void Game::destruct()
@@ -201,7 +197,6 @@ void Game::displayBackground()
 }
 
 //ECS
-
 int Game::createEntity()
 {
 	for (int i = 0; i < MAX_ENTITIES; ++i)

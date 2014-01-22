@@ -17,7 +17,7 @@ public:
 	void destruct();
 
 	void displayBackground();
-	void reloadBackground(); //trash function, just for testing
+	void reloadBackground(); //trash function, just for testing	//way to junk up the code man
 
 	bool loadSector(int sectorNumber);
 	void loadTileClips();
@@ -26,7 +26,7 @@ public:
 	int createEntity();
 	void destroyEntity(int i);
 
-	void createHero();
+	void createHero(int x, int y);
 	void createTree(int x, int y);
 
 	void movementSystem();
@@ -42,11 +42,14 @@ public:
 private:
 
 	bool collisionChecker(int x, int y);
+	void cutTrees(int x, int y);
 
 	Texture tileTexture;
 	Sprite mouseSprite;
 
 	Tile* sector[MAX_TILES];
+	entityData entityMap[MAX_TILES];
+
 	SDL_Rect tileClips[MAX_TILE_TYPES];
 
 	std::vector<int> componentMasks;
@@ -61,7 +64,6 @@ private:
 	
 	int cameraVelX;
 	int cameraVelY;
-
 
 	int mouseX;
 	int mouseY;

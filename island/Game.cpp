@@ -37,6 +37,10 @@ Game::Game()
 	mouseX = 0;
 	mouseY = 0;
 
+	for(int i = 0; i < MAX_TILES; ++i)
+	{
+		entityMap[i].type = NONE;
+	}
 }
 
 Game::~Game()
@@ -132,12 +136,6 @@ bool Game::loadSector(int sectorNumber)
 			y = (i / LEVEL_WIDTH) * TILE_WIDTH;
 			sectorFile >> type;
 
-			if (sectorFile.fail())
-			{
-				cout << "Error loading sector file at " << path << endl;
-				return false;
-			}
-
 			sector[i] = new Tile(x, y, type);
 		}
 	}
@@ -212,7 +210,11 @@ int Game::createEntity()
 
 void Game::destroyEntity(int i)
 {
+	//need to handle other component* stuff.
+	//also my solution is probs bad
 	componentMasks[i] = COMPONENT_NONE;
+	componentCoordinates[i].x = NULL;
+	componentCoordinates[i].y = NULL;
 }
 
 void Game::eventHandler(SDL_Event& event)
@@ -228,43 +230,62 @@ void Game::eventHandler(SDL_Event& event)
 				if(!collisionChecker(componentCoordinates[heroNum].x,
 				                 componentCoordinates[heroNum].y - HERO_VEL))
 				{
+					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
+					          +componentCoordinates[heroNum].x].type = NONE;
 					componentCoordinates[heroNum].y -= HERO_VEL;
+					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
+					          +componentCoordinates[heroNum].x].type = HERO;
 				}
 				break;
 			case SDLK_s:
 				if(!collisionChecker(componentCoordinates[heroNum].x,
 				                 componentCoordinates[heroNum].y + HERO_VEL))
 				{
+					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
+					          +componentCoordinates[heroNum].x].type = NONE;
 					componentCoordinates[heroNum].y += HERO_VEL;
+					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
+					          +componentCoordinates[heroNum].x].type = HERO;
 				}
 				break;
 			case SDLK_a:
 				if(!collisionChecker(componentCoordinates[heroNum].x - HERO_VEL,
 				                 componentCoordinates[heroNum].y))
 				{
+					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
+					          +componentCoordinates[heroNum].x].type = NONE;
 					componentCoordinates[heroNum].x -= HERO_VEL;
+					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
+					          +componentCoordinates[heroNum].x].type = HERO;
 				}
 				break;
 			case SDLK_d:
 				if(!collisionChecker(componentCoordinates[heroNum].x + HERO_VEL,
 				                 componentCoordinates[heroNum].y))
 				{
+					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
+					          +componentCoordinates[heroNum].x].type = NONE;
 					componentCoordinates[heroNum].x += HERO_VEL;
+					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
+					          +componentCoordinates[heroNum].x].type = HERO;
 				}
 				break;
 			case SDLK_SPACE:
 				centerCamera(heroNum, camera);
-
 				break;
-			}
+			case SDLK_c:
+				cutTrees(componentCoordinates[heroNum].x,
+				         componentCoordinates[heroNum].y);
+				break;
+		}
 	}
-	else if (event.type == SDL_KEYUP && event.key.repeat == 0)
+/*	else if (event.type == SDL_KEYUP && event.key.repeat == 0)
 	{
 		switch(event.key.keysym.sym)
 		{
 
 		}
-	}
+	}*/
 
 	if (componentCoordinates[heroNum].x < 0) componentCoordinates[heroNum].x += HERO_VEL;
 	if (componentCoordinates[heroNum].x > LEVEL_WIDTH - 1) componentCoordinates[heroNum].x -= HERO_VEL;
@@ -326,24 +347,26 @@ void Game::updateCamera(SDL_Rect& camera)
 	if (camera.y < 0) camera.y = 0;
 }
 
-void Game::createHero()
+void Game::createHero(int x, int y)
 {
 	heroNum = createEntity();
 	componentMasks[heroNum] = 
 		COMPONENT_VELOCITY | COMPONENT_SPRITE | COMPONENT_POSITION;
 
-	componentPositions[heroNum].x = TILE_WIDTH/4;
-	componentPositions[heroNum].y = TILE_WIDTH/4;
+	componentCoordinates[heroNum].x = x;
+	componentCoordinates[heroNum].y = y;
 
-	componentCoordinates[heroNum].x = 0;
-	componentCoordinates[heroNum].y = 0;
+	componentPositions[heroNum].x = TILE_WIDTH/4 + x*TILE_WIDTH;
+	componentPositions[heroNum].y = TILE_WIDTH/4 + y*TILE_WIDTH;
 
 	componentVelocities[heroNum].x = 0;
 	componentVelocities[heroNum].y = 0;
-	
 
 	componentSprites[heroNum].initialize("images/hero.png", 
 		32, 32, 1, 1);
+
+	entityMap[y*LEVEL_WIDTH+x].type  = HERO;
+	entityMap[y*LEVEL_WIDTH+x].index = heroNum;
 }
 
 void Game::createTree(int x, int y)
@@ -363,6 +386,9 @@ void Game::createTree(int x, int y)
 	
 	componentSprites[treeNums.back()].initialize("images/tree.png", 
 		32, 32, 1, 1);
+
+	entityMap[y*LEVEL_WIDTH+x].type  = TREE;
+	entityMap[y*LEVEL_WIDTH+x].index = treeNums.back();
 }
 
 void Game::movementSystem()
@@ -412,10 +438,79 @@ bool Game::collisionChecker(int x, int y)
 {
 	for (int i = 0; i < MAX_ENTITIES; ++i)
 	{
-		if (componentCoordinates[i].x == x && componentCoordinates[i].y == y)
+		if ((componentCoordinates[i].x == x && componentCoordinates[i].y == y)
+		    || sector[y*LEVEL_WIDTH + x]->getType() == 0)
 		{
 			return true;
 		}
 	}
 	return false;
+}
+
+void Game::cutTrees(int x, int y)
+{
+	int i = y*LEVEL_WIDTH+x+1;
+	if(i < MAX_TILES)
+	{
+		if(entityMap[i].type == TREE)
+		{
+			destroyEntity(entityMap[i].index);
+		}
+	}
+	i = (y+1)*LEVEL_WIDTH+x+1;
+	if(i < MAX_TILES)
+	{
+		if(entityMap[i].type == TREE)
+		{
+			destroyEntity(entityMap[i].index);
+		}
+	}
+	i = (y-1)*LEVEL_WIDTH+x+1;
+	if(i < MAX_TILES)
+	{
+		if(entityMap[i].type == TREE)
+		{
+			destroyEntity(entityMap[i].index);
+		}
+	}
+	i = y*LEVEL_WIDTH+x-1;
+	if(i < MAX_TILES)
+	{
+		if(entityMap[i].type == TREE)
+		{
+			destroyEntity(entityMap[i].index);
+		}
+	}
+	i = (y+1)*LEVEL_WIDTH+x-1;
+	if(i < MAX_TILES)
+	{
+		if(entityMap[i].type == TREE)
+		{
+			destroyEntity(entityMap[i].index);
+		}
+	}
+	i = (y-1)*LEVEL_WIDTH+x-1;
+	if(i < MAX_TILES)
+	{
+		if(entityMap[i].type == TREE)
+		{
+			destroyEntity(entityMap[i].index);
+		}
+	}
+	i = (y+1)*LEVEL_WIDTH+x;
+	if(i < MAX_TILES)
+	{
+		if(entityMap[i].type == TREE)
+		{
+			destroyEntity(entityMap[i].index);
+		}
+	}
+	i = (y-1)*LEVEL_WIDTH+x;
+	if(i < MAX_TILES)
+	{
+		if(entityMap[i].type == TREE)
+		{
+			destroyEntity(entityMap[i].index);
+		}
+	}
 }

@@ -37,15 +37,19 @@ int main (int argc, char* args[]) {
 		return 1;
 	}
 	*/
-	game.loadRandomSector();
+	game.loadSector(1);
 
 	game.loadTileClips();
 	
 	game.createTree(2,3);
 	game.createTree(5,6);
-
-
-	game.createHero();
+	game.createTree(2,12);
+	game.createTree(5,9);
+	game.createTree(8,3);
+	game.createTree(13,5);
+	game.createTree(12,7);
+	game.createTree(9,13);
+	game.createHero(3, 3);
 
 	bool quit = false;
 	SDL_Event event;
@@ -59,8 +63,6 @@ int main (int argc, char* args[]) {
 				case SDL_QUIT:
 					quit = true;
 					break;
-
-
 				case SDL_KEYDOWN:
 					switch(event.key.keysym.sym)
 					{
@@ -68,14 +70,11 @@ int main (int argc, char* args[]) {
 							quit = true;
 							break;
 					}
-
 			}
-
 			game.eventHandler(event);
 		}
 
 		game.updateCamera(camera);
-
 
 		SDL_RenderClear(mainRenderer);
 		game.displayBackground();
@@ -83,15 +82,9 @@ int main (int argc, char* args[]) {
 		game.movementSystem();
 		SDL_RenderPresent(mainRenderer);
 
-
-		
 	}
 
 	game.destruct();
-
-
-
-
 
 	return 0;
 }

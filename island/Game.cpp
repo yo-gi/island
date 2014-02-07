@@ -25,22 +25,24 @@ Game::Game()
 	cameraVelX = 0;
 	cameraVelY = 0;
 
-	for (int i = 0; i < MAX_TILE_TYPES; ++i)
-	{
-		tileClips[i].w = TILE_WIDTH;
-		tileClips[i].h = TILE_WIDTH;
-	}
+	mouse.x = 0;
+	mouse.y = 0;
 
-	camera.x = 0;
-	camera.y = 0;
+	mouseCoordinate.x = 0;
+	mouseCoordinate.y = 0;
 
-	mouseX = 0;
-	mouseY = 0;
+	clickStart.x = 0;
+	clickStart.y = 0;
+
+	clickEnd.x = 0;
+	clickEnd.y = 0;
 
 	for(int i = 0; i < MAX_TILES; ++i)
 	{
 		entityMap[i].type = NONE;
 	}
+
+	doneSelecting = false;
 }
 
 Game::~Game()
@@ -87,9 +89,6 @@ bool Game::initialize()
 		return false;
 	}
 
-	loadRandomSector();
-	loadTileClips();
-
 	SDL_SetRelativeMouseMode((SDL_bool)true);
 
 	return true;
@@ -97,12 +96,6 @@ bool Game::initialize()
 
 bool Game::loadMedia()
 {
-	if (!tileTexture.loadFrom("images/texture.png"))
-	{
-		cout << "Couldn't load tile texture\n";
-		return false;
-	}
-
 	if (!mouseSprite.initialize("images/cursor.png", 32, 32, 1, 1))
 	{
 		cout << "Couldn't load mouse texture\n";
@@ -110,66 +103,6 @@ bool Game::loadMedia()
 	}
 
 	return true;
-}
-
-bool Game::loadSector(int sectorNumber)
-{
-	string path;
-	path.append("sectors/sector_");
-	path.append(to_string(sectorNumber));
-	path.append(".txt");
-
-	ifstream sectorFile(path);
-
-	if (sector == NULL)
-	{
-		cout << "Couldn't load sector file at " << path << endl;
-		return false;
-	}
-	else
-	{
-		int x, y, type;
-
-		for (int i = 0; i < MAX_TILES; ++i)
-		{
-			x = (i % LEVEL_WIDTH) * TILE_WIDTH;
-			y = (i / LEVEL_WIDTH) * TILE_WIDTH;
-			sectorFile >> type;
-
-			sector[i] = new Tile(x, y, type);
-		}
-	}
-
-	sectorFile.close();
-	return true;
-}
-
-void Game::loadRandomSector()
-{
-	int x, y, type;
-
-	for (int i = 0; i < MAX_TILES; ++i)
-	{
-		x = (i % LEVEL_WIDTH) * TILE_WIDTH;
-		y = (i / LEVEL_WIDTH) * TILE_WIDTH;
-		type = rand() % 2;
-
-		sector[i] = new Tile(x, y, type);
-	}
-}
-
-void Game::loadTileClips()
-{
-	tileClips[TILE_WATER].x = TILE_WIDTH;
-	tileClips[TILE_WATER].y = 0;
-
-	tileClips[TILE_SAND].x = 0;
-	tileClips[TILE_SAND].y = 0;
-}
-
-void Game::reloadBackground()
-{
-
 }
 
 void Game::destruct()
@@ -185,13 +118,17 @@ void Game::destruct()
 
 void Game::displayBackground()
 {
-	for (int i = 0; i < MAX_TILES; ++i)
+	map.renderMap();
+}
+
+void Game::loadMap()
+{
+	if (!map.loadSector(1))
 	{
-		if (checkCollision(camera, sector[i]->getBox()))
-		{
-			sector[i]->render(&tileTexture, &tileClips[sector[i]->getType()]);
-		}
+		cout << "Couldn't load sector 1" << endl;
+		exit(1);
 	}
+	//map.generateSector();
 }
 
 //ECS
@@ -232,6 +169,7 @@ void Game::eventHandler(SDL_Event& event)
 				{
 					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
 					          +componentCoordinates[heroNum].x].type = NONE;
+
 					componentCoordinates[heroNum].y -= HERO_VEL;
 					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
 					          +componentCoordinates[heroNum].x].type = HERO;
@@ -279,20 +217,55 @@ void Game::eventHandler(SDL_Event& event)
 				break;
 		}
 	}
-/*	else if (event.type == SDL_KEYUP && event.key.repeat == 0)
+
+	if (event.type == SDL_MOUSEBUTTONDOWN)
 	{
-		switch(event.key.keysym.sym)
+		if (event.button.button == SDL_BUTTON_LEFT)
 		{
+			selected.clear();
+
+			doneSelecting = false;
+			clickStart.x = mouseCoordinate.x;
+			clickStart.y = mouseCoordinate.y;
+
+			cout << clickStart.x << ", " << clickStart.y << endl;
+		}
+
+		if (event.button.button == SDL_BUTTON_RIGHT)
+		{
+			if (!selected.empty())
+			{
+				for (int i = 0; i < selected.size(); ++i)
+				{
+					cout << selected[i] << ", " << heroNum << endl;
+					updatePosition(selected[i], mouseCoordinate.x, 
+						mouseCoordinate.y);	
+				}	
+			}
+			
+		}
+	}
+
+	if (event.type == SDL_MOUSEBUTTONUP)
+	{
+		if (event.button.button == SDL_BUTTON_LEFT)
+		{
+			doneSelecting = true;
+			clickEnd.x = mouseCoordinate.x;
+			clickEnd.y = mouseCoordinate.y;
+
+			cout << clickEnd.x << ", " << clickEnd.y << ", ";
+
+			selectionSystem();
+			cout << selected.size() << endl;
 
 		}
-	}*/
+	}
 
 	if (componentCoordinates[heroNum].x < 0) componentCoordinates[heroNum].x += HERO_VEL;
 	if (componentCoordinates[heroNum].x > LEVEL_WIDTH - 1) componentCoordinates[heroNum].x -= HERO_VEL;
 	if (componentCoordinates[heroNum].y < 0) componentCoordinates[heroNum].y += HERO_VEL;
 	if (componentCoordinates[heroNum].y > LEVEL_HEIGHT - 1) componentCoordinates[heroNum].y -= HERO_VEL;
-
-	cout << componentCoordinates[heroNum].x << ", " << componentCoordinates[heroNum].y << endl;
 }
 
 void Game::centerCamera(int componentIndex, SDL_Rect& camera)
@@ -315,21 +288,25 @@ void Game::centerCamera(int componentIndex, SDL_Rect& camera)
 		componentCoordinates[heroNum].y -= HERO_VEL;
 
 	//cout << componentCoordinates[heroNum].x << ", " << componentCoordinates[heroNum].y << endl;
-	cout << mouseX << ", " << mouseY << endl;
+	cout << mouse.x << ", " << mouse.y << ", " << mouseCoordinate.x << ", ";
+	cout << mouseCoordinate.y << endl;
 }
 
 void Game::mouseHandler()
 {
-	SDL_GetMouseState(&mouseX, &mouseY);
+	SDL_GetMouseState(&mouse.x, &mouse.y);
+
+	mouseCoordinate.x = (mouse.x + camera.x) / TILE_WIDTH;
+	mouseCoordinate.y = (mouse.y + camera.y) / TILE_WIDTH;
 }
 
 void Game::updateCamera(SDL_Rect& camera)
 {
 
-	if (mouseX < 10) 				camera.x -= CAMERA_VEL;
-	if (mouseX > SCREEN_WIDTH - 10) camera.x += CAMERA_VEL;
-	if (mouseY < 10) 				camera.y -= CAMERA_VEL;
-	if (mouseY > SCREEN_HEIGHT - 10) camera.y += CAMERA_VEL;
+	if (mouse.x < 10) 				camera.x -= CAMERA_VEL;
+	if (mouse.x > SCREEN_WIDTH - 10) camera.x += CAMERA_VEL;
+	if (mouse.y < 10) 				camera.y -= CAMERA_VEL;
+	if (mouse.y > SCREEN_HEIGHT - 10) camera.y += CAMERA_VEL;
 
 	if (camera.x < 0) camera.x = 0;
 	if (camera.y < 0) camera.y = 0;
@@ -347,11 +324,21 @@ void Game::updateCamera(SDL_Rect& camera)
 	if (camera.y < 0) camera.y = 0;
 }
 
+void Game::updatePosition(int index, int x, int y)
+{
+	componentCoordinates[index].x = x;
+	componentCoordinates[index].y = y;
+
+	componentPositions[index].x = TILE_WIDTH/4 + x*TILE_WIDTH;
+	componentPositions[index].y = TILE_WIDTH/4 + y*TILE_WIDTH;
+}
+
 void Game::createHero(int x, int y)
 {
 	heroNum = createEntity();
 	componentMasks[heroNum] = 
-		COMPONENT_VELOCITY | COMPONENT_SPRITE | COMPONENT_POSITION;
+		COMPONENT_VELOCITY | COMPONENT_SPRITE | COMPONENT_POSITION
+		| COMPONENT_CLICKABLE;
 
 	componentCoordinates[heroNum].x = x;
 	componentCoordinates[heroNum].y = y;
@@ -365,15 +352,16 @@ void Game::createHero(int x, int y)
 	componentSprites[heroNum].initialize("images/hero.png", 
 		32, 32, 1, 1);
 
-	entityMap[y*LEVEL_WIDTH+x].type  = HERO;
-	entityMap[y*LEVEL_WIDTH+x].index = heroNum;
+	entityMap[y * LEVEL_WIDTH + x].type  = HERO;
+	entityMap[y * LEVEL_WIDTH + x].index = heroNum;
 }
 
 void Game::createTree(int x, int y)
 {
 	treeNums.push_back(createEntity());
 	componentMasks[treeNums.back()] = 
-		COMPONENT_VELOCITY | COMPONENT_SPRITE | COMPONENT_POSITION;
+		COMPONENT_VELOCITY | COMPONENT_SPRITE | COMPONENT_POSITION
+		| COMPONENT_CLICKABLE;
 
 	componentPositions[treeNums.back()].x = TILE_WIDTH/4;
 	componentPositions[treeNums.back()].y = TILE_WIDTH/4;
@@ -387,8 +375,8 @@ void Game::createTree(int x, int y)
 	componentSprites[treeNums.back()].initialize("images/tree.png", 
 		32, 32, 1, 1);
 
-	entityMap[y*LEVEL_WIDTH+x].type  = TREE;
-	entityMap[y*LEVEL_WIDTH+x].index = treeNums.back();
+	entityMap[y * LEVEL_WIDTH+x].type  = TREE;
+	entityMap[y * LEVEL_WIDTH+x].index = treeNums.back();
 }
 
 void Game::movementSystem()
@@ -430,7 +418,21 @@ void Game::animationSystem()
 		}
 	}
 
-	mouseSprite.animate(mouseX, mouseY);
+	mouseSprite.animate(mouse.x, mouse.y);
+}
+
+void Game::selectionSystem()
+{
+	for (int i = clickStart.x; i <= clickEnd.x; ++i)
+	{
+		for (int j = clickStart.y; j <= clickEnd.y; ++j)
+		{
+			if (entityMap[j * LEVEL_WIDTH + i].type == HERO)
+			{
+				selected.push_back(entityMap[j * LEVEL_WIDTH + i].index);
+			}
+		}
+	}
 
 }
 
@@ -439,7 +441,7 @@ bool Game::collisionChecker(int x, int y)
 	for (int i = 0; i < MAX_ENTITIES; ++i)
 	{
 		if ((componentCoordinates[i].x == x && componentCoordinates[i].y == y)
-		    || sector[y*LEVEL_WIDTH + x]->getType() == 0)
+		    || map.getType(y*LEVEL_WIDTH + x) == 0)
 		{
 			return true;
 		}

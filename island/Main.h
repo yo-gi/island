@@ -14,13 +14,18 @@ const int MAX_ENTITIES = 50;
 
 const int LEVEL_WIDTH = 16;
 const int LEVEL_HEIGHT = 16;
-const int MAX_TILE_TYPES = 2;
+const int MAX_TILE_TYPES = 3;
 const int MAX_TILES = LEVEL_HEIGHT * LEVEL_WIDTH;
 
 const int TILE_WIDTH = 64;
 
+/*
 const int SCREEN_HEIGHT = TILE_WIDTH*9;
 const int SCREEN_WIDTH = TILE_WIDTH*12;
+*/
+
+const int SCREEN_HEIGHT = TILE_WIDTH*13;
+const int SCREEN_WIDTH = TILE_WIDTH*13;
 
 const int HERO_VEL = 1;
 const int CAMERA_VEL = 1;
@@ -32,6 +37,7 @@ extern SDL_Rect camera;
 
 const int TILE_WATER = 0;
 const int TILE_SAND = 1;
+const int TILE_LAND = 2;
 
 typedef enum
 {
@@ -42,6 +48,11 @@ typedef enum
 	COMPONENT_CLICKABLE = 1 << 3
 } Component;
 
+const int MOVEMENT_MASK = (COMPONENT_POSITION | COMPONENT_VELOCITY);
+
+bool checkCollision(SDL_Rect one, SDL_Rect two);
+int manDist(SDL_Point one, SDL_Point two);
+
 typedef enum
 {
 	HERO,
@@ -49,12 +60,9 @@ typedef enum
 	NONE
 } entityType;
 
-const int MOVEMENT_MASK = (COMPONENT_POSITION | COMPONENT_VELOCITY);
-
-bool checkCollision(SDL_Rect one, SDL_Rect two);
-
 struct entityData
 {
 	int index;
 	entityType type;
 };
+

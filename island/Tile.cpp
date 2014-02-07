@@ -1,5 +1,7 @@
 #include "Tile.h"
 
+using namespace std;
+
 Tile::Tile(int x, int y, int newTileType)
 {
 	tileBox.x = x;
@@ -21,7 +23,22 @@ int Tile::getType()
 	return tileType;
 }
 
+void Tile::setType(int type)
+{
+	tileType = type;
+}
+
 SDL_Rect Tile::getBox()
 {
 	return tileBox;
+}
+
+int Tile::getX()
+{
+	return tileBox.x;
+}
+
+int Tile::getY()
+{
+	return tileBox.y;
 }

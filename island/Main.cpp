@@ -37,9 +37,8 @@ int main (int argc, char* args[]) {
 		return 1;
 	}
 	*/
-	game.loadSector(1);
-
-	game.loadTileClips();
+	//game.loadSector(1);
+	game.loadMap();
 	
 	game.createTree(2,3);
 	game.createTree(5,6);
@@ -77,9 +76,11 @@ int main (int argc, char* args[]) {
 		game.updateCamera(camera);
 
 		SDL_RenderClear(mainRenderer);
+
 		game.displayBackground();
 		game.animationSystem();
 		game.movementSystem();
+
 		SDL_RenderPresent(mainRenderer);
 
 	}
@@ -113,4 +114,9 @@ bool checkCollision(SDL_Rect one, SDL_Rect two)
 	if (leftOne >= rightTwo) return false;
 
 	return true;
+}
+
+int manDist(SDL_Point one, SDL_Point two)
+{
+	return abs(one.x - two.x) + abs(one.y - two.y);
 }

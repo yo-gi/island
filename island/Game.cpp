@@ -435,9 +435,27 @@ void Game::movementSystem()
 				updateDestination(i, cDestinations[i].x, cDestinations[i].y);
 			}
 
-			updatePosition(i, cDestinations[i].x, cDestinations[i].y);
+			if (moveStep(i, cDestinations[i].x, cDestinations[i].y))
+				updatePosition(i, cDestinations[i].x, cDestinations[i].y);
 		}
 	}
+}
+
+bool Game::moveStep(int index, int destX, int destY)
+{
+	int curX = cPositions[index].x;
+	int curY = cPositions[index].y;
+
+	destX *= TILE_WIDTH;
+	destY *= TILE_WIDTH;
+
+	if (curX > destX) cPositions[index].x -= HERO_VEL;
+	if (curX < destX) cPositions[index].x += HERO_VEL;
+	if (curY > destY) cPositions[index].y -= HERO_VEL;
+	if (curY < destY) cPositions[index].y += HERO_VEL;
+
+	if (curY == destY && curX == destX) return true;
+	else return false;
 }
 
 void Game::animationSystem()
@@ -457,7 +475,8 @@ void Game::animationSystem()
 		{
 			for (int j = clickStart.y; j <= mouseCoordinate.y; ++j)
 			{
-				selectSprite.animate(i * TILE_WIDTH, j * TILE_WIDTH);
+				selectSprite.animate(i * TILE_WIDTH - camera.x, 
+					j * TILE_WIDTH - camera.y);
 			}
 		}
 	}
@@ -472,7 +491,6 @@ void Game::selectionSystem()
 		for (int j = clickStart.y; j <= clickEnd.y; ++j)
 		{
 			if (findEntity(j * LEVEL_WIDTH + i, HERO))
-			//if (entityMap[j * LEVEL_WIDTH + i].type == HERO)
 			{
 				selected.push_back(entityMap[j * LEVEL_WIDTH + i].index);
 			}
@@ -584,18 +602,6 @@ bool Game::collisionChecker(int index, int x, int y)
 		return true;
 	} 
 	else return false;
-
-	/*
-	for (int i = 0; i < MAX_ENTITIES; ++i)
-	{
-		if ((cCoordinates[i].x == x && cCoordinates[i].y == y)
-		    || map.getType(y*LEVEL_WIDTH + x) == 0)
-		{
-			return true;
-		}
-	}
-	return false;
-	*/
 }
 
 void Game::cutTrees(int x, int y)

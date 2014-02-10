@@ -13,26 +13,28 @@ public:
 	Game();
 	~Game();
 
+	//Initialize
 	bool initialize();
 	bool loadMedia();
 	void destruct();
-
-	void displayBackground();
-	void reloadBackground(); //trash function, just for testing
 	void loadMap();
 
+	//Background
+	void displayBackground();
+	void updateCamera(SDL_Rect& camera);
+	void centerCamera(int componentIndex, SDL_Rect& camera);
+	
+	//Entity management
 	int createEntity();
 	void destroyEntity(int i);
 
 	void createHero(int x, int y);
 	void createTree(int x, int y);
 
+	//_Systems
 	void movementSystem();
 	void animationSystem();
 	void selectionSystem();
-
-	void updateCamera(SDL_Rect& camera);
-	void centerCamera(int componentIndex, SDL_Rect& camera);
 
 	//Event handling
 	void eventHandler(SDL_Event& event);
@@ -51,6 +53,7 @@ private:
 
 	void assignDestinations(int x, int y);
 	void updateDestination(int index, int x, int y);
+	bool moveStep(int index, int destX, int destY);
 
 	//Textures and Sprites
 	Texture tileTexture;
@@ -68,7 +71,6 @@ private:
 	std::vector<SDL_Point> cCoordinates;
 	std::vector<SDL_Point> cDestinations;
 	std::vector<Velocity> cVelocities;
-
 	std::vector<Sprite> cSprites;
 	std::vector<entityType> cTypes;
 

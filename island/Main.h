@@ -9,6 +9,7 @@
 #include <ctime>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 const int MAX_ENTITIES = 50;
 
@@ -45,7 +46,10 @@ typedef enum
 	COMPONENT_POSITION = 1 << 0,
 	COMPONENT_VELOCITY = 1 << 1,
 	COMPONENT_SPRITE = 1 << 2,
-	COMPONENT_CLICKABLE = 1 << 3
+	COMPONENT_CLICKABLE = 1 << 3,
+	COMPONENT_DESTINATION = 1 << 4,
+	COMPONENT_TEST = 1 << 5
+
 } Component;
 
 const int MOVEMENT_MASK = (COMPONENT_POSITION | COMPONENT_VELOCITY);
@@ -57,6 +61,9 @@ typedef enum
 {
 	HERO,
 	TREE,
+	WATER,
+	SAND,
+	LAND,
 	NONE
 } entityType;
 

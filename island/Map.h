@@ -23,8 +23,4 @@ private:
 	Texture tileTexture;
 	Tile* sector[MAX_TILES];
 	SDL_Rect tileClips[MAX_TILE_TYPES];
-
-	std::vector<SDL_Rect> rooms;
-
-
 };

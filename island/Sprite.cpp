@@ -64,3 +64,8 @@ SDL_Rect Sprite::getBox()
 	return frame;
 
 }
+
+void Sprite::setAlpha(Uint8 alpha)
+{
+	baseTexture.setAlpha(alpha);
+}

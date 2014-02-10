@@ -21,7 +21,6 @@ Map::Map()
 	}
 
 	loadTileClips();
-	rooms.resize(16*16);
 }
 
 bool Map::loadSector(int sectorNumber)

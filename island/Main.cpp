@@ -48,7 +48,9 @@ int main (int argc, char* args[]) {
 	game.createTree(13,5);
 	game.createTree(12,7);
 	game.createTree(9,13);
+
 	game.createHero(3, 3);
+	game.createHero(3, 4);
 
 	bool quit = false;
 	SDL_Event event;

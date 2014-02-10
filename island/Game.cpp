@@ -7,18 +7,18 @@ Game::Game()
 	mainWindow = NULL;
 	mainRenderer = NULL;
 
-	componentMasks.resize(MAX_ENTITIES);
-	componentVelocities.resize(MAX_ENTITIES);
-	componentSprites.resize(MAX_ENTITIES);
-	componentPositions.resize(MAX_ENTITIES);
-	componentCoordinates.resize(MAX_ENTITIES);
+	cMasks.resize(MAX_ENTITIES);
+	cVelocities.resize(MAX_ENTITIES);
+	cSprites.resize(MAX_ENTITIES);
+	cPositions.resize(MAX_ENTITIES);
+	cDestinations.resize(MAX_ENTITIES);
+	cCoordinates.resize(MAX_ENTITIES);
 
-	for (auto i : componentMasks)
+	for (auto i : cMasks)
 	{
 		i = COMPONENT_NONE;
 	}
 
-	heroNum = 0;
 	treeNums.push_back(1);
 	treeNums.push_back(2);
 
@@ -37,12 +37,7 @@ Game::Game()
 	clickEnd.x = 0;
 	clickEnd.y = 0;
 
-	for(int i = 0; i < MAX_TILES; ++i)
-	{
-		entityMap[i].type = NONE;
-	}
-
-	doneSelecting = false;
+	doneSelecting = true;
 }
 
 Game::~Game()
@@ -102,6 +97,14 @@ bool Game::loadMedia()
 		return false;
 	}
 
+	if (!selectSprite.initialize("images/select.png", 
+		TILE_WIDTH, TILE_WIDTH, 1, 1))
+	{
+		cout << "Couldn't load selecting texture\n";
+		return false;
+	}
+	else selectSprite.setAlpha(127);
+
 	return true;
 }
 
@@ -128,7 +131,16 @@ void Game::loadMap()
 		cout << "Couldn't load sector 1" << endl;
 		exit(1);
 	}
-	//map.generateSector();
+
+	for(int i = 0; i < MAX_TILES; ++i)
+	{
+		entityMap[i].type = NONE;
+		if (map.getType(i) == TILE_WATER) entityMap[i].type = WATER;
+		if (map.getType(i) == TILE_SAND) entityMap[i].type = SAND;
+		if (map.getType(i) == TILE_LAND) entityMap[i].type = LAND;
+
+		entityMap[i].index = -1;
+	}
 }
 
 //ECS
@@ -136,7 +148,7 @@ int Game::createEntity()
 {
 	for (int i = 0; i < MAX_ENTITIES; ++i)
 	{
-		if (componentMasks[i] == COMPONENT_NONE)
+		if (cMasks[i] == COMPONENT_NONE)
 		{
 			return i;
 		}
@@ -149,9 +161,9 @@ void Game::destroyEntity(int i)
 {
 	//need to handle other component* stuff.
 	//also my solution is probs bad
-	componentMasks[i] = COMPONENT_NONE;
-	componentCoordinates[i].x = NULL;
-	componentCoordinates[i].y = NULL;
+	cMasks[i] = COMPONENT_NONE;
+	cCoordinates[i].x = NULL;
+	cCoordinates[i].y = NULL;
 }
 
 void Game::eventHandler(SDL_Event& event)
@@ -163,60 +175,47 @@ void Game::eventHandler(SDL_Event& event)
 	{
 		switch(event.key.keysym.sym)
 		{
-			case SDLK_w:
-				if(!collisionChecker(componentCoordinates[heroNum].x,
-				                 componentCoordinates[heroNum].y - HERO_VEL))
+			/*case SDLK_w:
+				if(!collisionChecker(cCoordinates[heroNum].x,
+				    cCoordinates[heroNum].y - HERO_VEL))
 				{
-					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
-					          +componentCoordinates[heroNum].x].type = NONE;
-
-					componentCoordinates[heroNum].y -= HERO_VEL;
-					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
-					          +componentCoordinates[heroNum].x].type = HERO;
+					updatePosition(heroNum, cCoordinates[heroNum].x, 
+						cCoordinates[heroNum].y - HERO_VEL);
 				}
 				break;
 			case SDLK_s:
-				if(!collisionChecker(componentCoordinates[heroNum].x,
-				                 componentCoordinates[heroNum].y + HERO_VEL))
+				if(!collisionChecker(cCoordinates[heroNum].x,
+				    cCoordinates[heroNum].y + HERO_VEL))
 				{
-					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
-					          +componentCoordinates[heroNum].x].type = NONE;
-					componentCoordinates[heroNum].y += HERO_VEL;
-					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
-					          +componentCoordinates[heroNum].x].type = HERO;
+					updatePosition(heroNum, cCoordinates[heroNum].x, 
+						cCoordinates[heroNum].y + HERO_VEL);
 				}
 				break;
 			case SDLK_a:
-				if(!collisionChecker(componentCoordinates[heroNum].x - HERO_VEL,
-				                 componentCoordinates[heroNum].y))
+				if(!collisionChecker(cCoordinates[heroNum].x - HERO_VEL,
+				    cCoordinates[heroNum].y))
 				{
-					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
-					          +componentCoordinates[heroNum].x].type = NONE;
-					componentCoordinates[heroNum].x -= HERO_VEL;
-					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
-					          +componentCoordinates[heroNum].x].type = HERO;
+					updatePosition(heroNum, cCoordinates[heroNum].x - HERO_VEL, 
+						cCoordinates[heroNum].y);
 				}
 				break;
 			case SDLK_d:
-				if(!collisionChecker(componentCoordinates[heroNum].x + HERO_VEL,
-				                 componentCoordinates[heroNum].y))
+				if(!collisionChecker(cCoordinates[heroNum].x + HERO_VEL,
+				    cCoordinates[heroNum].y))
 				{
-					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
-					          +componentCoordinates[heroNum].x].type = NONE;
-					componentCoordinates[heroNum].x += HERO_VEL;
-					entityMap[componentCoordinates[heroNum].y*LEVEL_WIDTH
-					          +componentCoordinates[heroNum].x].type = HERO;
+					updatePosition(heroNum, cCoordinates[heroNum].x + HERO_VEL, 
+						cCoordinates[heroNum].y);
 				}
 				break;
 			case SDLK_SPACE:
 				centerCamera(heroNum, camera);
 				break;
 			case SDLK_c:
-				cutTrees(componentCoordinates[heroNum].x,
-				         componentCoordinates[heroNum].y);
+				cutTrees(cCoordinates[heroNum].x, cCoordinates[heroNum].y);
 				break;
+			*/
 		}
-	}
+	}	
 
 	if (event.type == SDL_MOUSEBUTTONDOWN)
 	{
@@ -228,21 +227,21 @@ void Game::eventHandler(SDL_Event& event)
 			clickStart.x = mouseCoordinate.x;
 			clickStart.y = mouseCoordinate.y;
 
-			cout << clickStart.x << ", " << clickStart.y << endl;
+			cout << "start: " << clickStart.x << ", " << clickStart.y << endl;
 		}
 
 		if (event.button.button == SDL_BUTTON_RIGHT)
 		{
-			if (!selected.empty())
+			//cout << "size: " << selected.size() << endl;
+			assignDestinations(mouseCoordinate.x, mouseCoordinate.y);
+			/*if (!selected.empty())
 			{
 				for (int i = 0; i < selected.size(); ++i)
 				{
-					cout << selected[i] << ", " << heroNum << endl;
-					updatePosition(selected[i], mouseCoordinate.x, 
-						mouseCoordinate.y);	
+					updatePosition(selected.back(), mouseCoordinate.x, 
+						mouseCoordinate.y);
 				}	
-			}
-			
+			}*/
 		}
 	}
 
@@ -254,42 +253,45 @@ void Game::eventHandler(SDL_Event& event)
 			clickEnd.x = mouseCoordinate.x;
 			clickEnd.y = mouseCoordinate.y;
 
-			cout << clickEnd.x << ", " << clickEnd.y << ", ";
+			cout << "end: " << clickEnd.x << ", " << clickEnd.y << ", ";
 
 			selectionSystem();
 			cout << selected.size() << endl;
 
 		}
 	}
-
-	if (componentCoordinates[heroNum].x < 0) componentCoordinates[heroNum].x += HERO_VEL;
-	if (componentCoordinates[heroNum].x > LEVEL_WIDTH - 1) componentCoordinates[heroNum].x -= HERO_VEL;
-	if (componentCoordinates[heroNum].y < 0) componentCoordinates[heroNum].y += HERO_VEL;
-	if (componentCoordinates[heroNum].y > LEVEL_HEIGHT - 1) componentCoordinates[heroNum].y -= HERO_VEL;
+/*
+	if (cCoordinates[heroNum].x < 0) cCoordinates[heroNum].x += HERO_VEL;
+	if (cCoordinates[heroNum].x > LEVEL_WIDTH - 1) cCoordinates[heroNum].x -= HERO_VEL;
+	if (cCoordinates[heroNum].y < 0) cCoordinates[heroNum].y += HERO_VEL;
+	if (cCoordinates[heroNum].y > LEVEL_HEIGHT - 1) cCoordinates[heroNum].y -= HERO_VEL;
+*/
 }
 
 void Game::centerCamera(int componentIndex, SDL_Rect& camera)
 {
-	camera.x = componentCoordinates[componentIndex].x*TILE_WIDTH
+	/*
+	camera.x = cCoordinates[componentIndex].x*TILE_WIDTH
 	+ TILE_WIDTH/2 - SCREEN_WIDTH/2;
-	camera.y = componentCoordinates[componentIndex].y*TILE_WIDTH
+	camera.y = cCoordinates[componentIndex].y*TILE_WIDTH
 	+ TILE_WIDTH/2 - SCREEN_HEIGHT/2;
 
-	if (componentCoordinates[heroNum].x < 0) 
-		componentCoordinates[heroNum].x += HERO_VEL;
+	if (cCoordinates[heroNum].x < 0) 
+		cCoordinates[heroNum].x += HERO_VEL;
 
-	if (componentCoordinates[heroNum].x > LEVEL_WIDTH - 1) 
-		componentCoordinates[heroNum].x -= HERO_VEL;
+	if (cCoordinates[heroNum].x > LEVEL_WIDTH - 1) 
+		cCoordinates[heroNum].x -= HERO_VEL;
 	
-	if (componentCoordinates[heroNum].y < 0) 
-		componentCoordinates[heroNum].y += HERO_VEL;
+	if (cCoordinates[heroNum].y < 0) 
+		cCoordinates[heroNum].y += HERO_VEL;
 	
-	if (componentCoordinates[heroNum].y > LEVEL_HEIGHT - 1) 
-		componentCoordinates[heroNum].y -= HERO_VEL;
+	if (cCoordinates[heroNum].y > LEVEL_HEIGHT - 1) 
+		cCoordinates[heroNum].y -= HERO_VEL;
 
-	//cout << componentCoordinates[heroNum].x << ", " << componentCoordinates[heroNum].y << endl;
+	//cout << cCoordinates[heroNum].x << ", " << cCoordinates[heroNum].y << endl;
 	cout << mouse.x << ", " << mouse.y << ", " << mouseCoordinate.x << ", ";
 	cout << mouseCoordinate.y << endl;
+	*/
 }
 
 void Game::mouseHandler()
@@ -326,84 +328,117 @@ void Game::updateCamera(SDL_Rect& camera)
 
 void Game::updatePosition(int index, int x, int y)
 {
-	componentCoordinates[index].x = x;
-	componentCoordinates[index].y = y;
+	int mapIndex = cCoordinates[index].y * LEVEL_WIDTH
+		+ cCoordinates[index].x;
 
-	componentPositions[index].x = TILE_WIDTH/4 + x*TILE_WIDTH;
-	componentPositions[index].y = TILE_WIDTH/4 + y*TILE_WIDTH;
+	entityType tempType = entityMap[mapIndex].type;
+	entityMap[mapIndex].type = NONE;
+	entityMap[mapIndex].index = -1;	
+
+	cCoordinates[index].x = x;
+	cCoordinates[index].y = y;
+	cPositions[index].x = TILE_WIDTH/4 + x*TILE_WIDTH;
+	cPositions[index].y = TILE_WIDTH/4 + y*TILE_WIDTH;
+
+	mapIndex = cCoordinates[index].y * LEVEL_WIDTH
+		+ cCoordinates[index].x;
+
+	entityMap[mapIndex].type = tempType;
+	entityMap[mapIndex].index = index;
 }
 
 void Game::createHero(int x, int y)
 {
-	heroNum = createEntity();
-	componentMasks[heroNum] = 
-		COMPONENT_VELOCITY | COMPONENT_SPRITE | COMPONENT_POSITION
-		| COMPONENT_CLICKABLE;
+	int heroNum = createEntity();
+	heroNums.push_back(heroNum);
 
-	componentCoordinates[heroNum].x = x;
-	componentCoordinates[heroNum].y = y;
+	cMasks[heroNum] = MOVEMENT_MASK | COMPONENT_SPRITE | COMPONENT_CLICKABLE;
 
-	componentPositions[heroNum].x = TILE_WIDTH/4 + x*TILE_WIDTH;
-	componentPositions[heroNum].y = TILE_WIDTH/4 + y*TILE_WIDTH;
+	updatePosition(heroNum, x, y);
 
-	componentVelocities[heroNum].x = 0;
-	componentVelocities[heroNum].y = 0;
+	/*	
+	cCoordinates[heroNum].x = x;
+	cCoordinates[heroNum].y = y;
 
-	componentSprites[heroNum].initialize("images/hero.png", 
+	cPositions[heroNum].x = TILE_WIDTH/4 + x*TILE_WIDTH;
+	cPositions[heroNum].y = TILE_WIDTH/4 + y*TILE_WIDTH;
+	*/
+
+	cDestinations[heroNum].x = x;
+	cDestinations[heroNum].y = y;
+
+	cVelocities[heroNum].x = 0;
+	cVelocities[heroNum].y = 0;
+
+	cSprites[heroNum].initialize("images/hero.png", 
 		32, 32, 1, 1);
 
-	entityMap[y * LEVEL_WIDTH + x].type  = HERO;
-	entityMap[y * LEVEL_WIDTH + x].index = heroNum;
+	entityMap[y * LEVEL_WIDTH + x].type = HERO;
 }
 
 void Game::createTree(int x, int y)
 {
 	treeNums.push_back(createEntity());
-	componentMasks[treeNums.back()] = 
-		COMPONENT_VELOCITY | COMPONENT_SPRITE | COMPONENT_POSITION
+	cMasks[treeNums.back()] = COMPONENT_SPRITE | COMPONENT_POSITION 
 		| COMPONENT_CLICKABLE;
 
-	componentPositions[treeNums.back()].x = TILE_WIDTH/4;
-	componentPositions[treeNums.back()].y = TILE_WIDTH/4;
-
-	componentCoordinates[treeNums.back()].x = x;
-	componentCoordinates[treeNums.back()].y = y;
-
-	componentVelocities[treeNums.back()].x = 0;
-	componentVelocities[treeNums.back()].y = 0;
+	updatePosition(treeNums.back(), x, y);
 	
-	componentSprites[treeNums.back()].initialize("images/tree.png", 
+	/*
+	cPositions[treeNums.back()].x = TILE_WIDTH/4;
+	cPositions[treeNums.back()].y = TILE_WIDTH/4;
+
+	cCoordinates[treeNums.back()].x = x;
+	cCoordinates[treeNums.back()].y = y;
+	*/
+
+	cDestinations[treeNums.back()].x = x;
+	cDestinations[treeNums.back()].y = y;
+	
+	cSprites[treeNums.back()].initialize("images/tree.png", 
 		32, 32, 1, 1);
 
-	entityMap[y * LEVEL_WIDTH+x].type  = TREE;
-	entityMap[y * LEVEL_WIDTH+x].index = treeNums.back();
+	entityMap[y * LEVEL_WIDTH + x].type = TREE;
 }
 
 void Game::movementSystem()
 {
+	/*for (int i = 0; i < MAX_ENTITIES; ++i)
+	{
+		if ((cMasks[i] & MOVEMENT_MASK) == MOVEMENT_MASK)
+		{
+			cPositions[i].x += cVelocities[i].x;
+			cPositions[i].y += cVelocities[i].y;
+		}
+
+		if (cPositions[i].y < 0 || cPositions[i].y > 
+			(LEVEL_HEIGHT*TILE_WIDTH - cSprites[i].getHeight()))
+		{
+			cPositions[i].y -= cVelocities[i].y;
+		}
+
+		if (cPositions[i].x < 0 || cPositions[i].x >
+			(LEVEL_WIDTH*TILE_WIDTH - cSprites[i].getHeight()))
+		{
+			cPositions[i].x -= cVelocities[i].x;
+		}
+
+		cPositions[i].x = TILE_WIDTH * cCoordinates[i].x + TILE_WIDTH/4;
+		cPositions[i].y = TILE_WIDTH * cCoordinates[i].y + TILE_WIDTH/4;	
+	}
+	*/
+
 	for (int i = 0; i < MAX_ENTITIES; ++i)
 	{
-		if ((componentMasks[i] & MOVEMENT_MASK) == MOVEMENT_MASK)
+		if (cMasks[i] & COMPONENT_DESTINATION == COMPONENT_DESTINATION)
 		{
-			componentPositions[i].x += componentVelocities[i].x;
-			componentPositions[i].y += componentVelocities[i].y;
-		}
+			if (collisionChecker(i, cDestinations[i].x, cDestinations[i].y))
+			{
+				updateDestination(i, cDestinations[i].x, cDestinations[i].y);
+			}
 
-		if (componentPositions[i].y < 0 || componentPositions[i].y > 
-			(LEVEL_HEIGHT*TILE_WIDTH - componentSprites[i].getHeight()))
-		{
-			componentPositions[i].y -= componentVelocities[i].y;
+			updatePosition(i, cDestinations[i].x, cDestinations[i].y);
 		}
-
-		if (componentPositions[i].x < 0 || componentPositions[i].x >
-			(LEVEL_WIDTH*TILE_WIDTH - componentSprites[i].getHeight()))
-		{
-			componentPositions[i].x -= componentVelocities[i].x;
-		}
-
-		componentPositions[i].x = TILE_WIDTH * componentCoordinates[i].x + TILE_WIDTH/4;
-		componentPositions[i].y = TILE_WIDTH * componentCoordinates[i].y + TILE_WIDTH/4;
-		
 	}
 }
 
@@ -411,10 +446,21 @@ void Game::animationSystem()
 {
 	for (int i = 0; i < MAX_ENTITIES; ++i)
 	{
-		if (componentMasks[i] & COMPONENT_SPRITE == COMPONENT_SPRITE)
+		if (cMasks[i] & COMPONENT_SPRITE == COMPONENT_SPRITE)
 		{
-			componentSprites[i].animate(componentPositions[i].x - camera.x, 
-				componentPositions[i].y - camera.y);
+			cSprites[i].animate(cPositions[i].x - camera.x, 
+				cPositions[i].y - camera.y);
+		}
+	}
+
+	if (!doneSelecting)
+	{
+		for (int i = clickStart.x; i <= mouseCoordinate.x; ++i)
+		{
+			for (int j = clickStart.y; j <= mouseCoordinate.y; ++j)
+			{
+				selectSprite.animate(i * TILE_WIDTH, j * TILE_WIDTH);
+			}
 		}
 	}
 
@@ -433,20 +479,125 @@ void Game::selectionSystem()
 			}
 		}
 	}
-
 }
 
-bool Game::collisionChecker(int x, int y)
+void Game::assignDestinations(int x, int y)
 {
+	for (auto hero : selected)
+	{
+		for (int i = 0; i < LEVEL_WIDTH - x; ++i)
+		{
+			if (!collisionChecker(hero, x, y))
+			{
+				setDestination(hero, x, y);
+				break;
+			}
+			else if (!collisionChecker(hero, x - i, y))
+			{
+				setDestination(hero, x - i, y);
+				break;
+			}
+			else if (!collisionChecker(hero, x + i, y))
+			{
+				setDestination(hero, x + i, y);
+				break;
+			}
+			else if (!collisionChecker(hero, x, y - i))
+			{
+				setDestination(hero, x, y - i);
+				break;
+			}
+			else if (!collisionChecker(hero, x, y + i))
+			{
+				setDestination(hero, x, y + i);
+				break;
+			}
+			else if (!collisionChecker(hero, x + i, y + i))
+			{
+				setDestination(hero, x + i, y + i);
+				break;
+			}
+			else if (!collisionChecker(hero, x - i, y - i))
+			{
+				setDestination(hero, x - i, y - i);
+				break;
+			}
+		}
+	}
+}
+
+void Game::updateDestination(int index, int x, int y)
+{
+	for (int i = 0; i < LEVEL_WIDTH - x; ++i)
+	{
+		if (!collisionChecker(index, x, y))
+		{
+			setDestination(index, x, y);
+			break;
+		}
+		else if (!collisionChecker(index, x - i, y))
+		{
+			setDestination(index, x - i, y);
+			break;
+		}
+		else if (!collisionChecker(index, x + i, y))
+		{
+			setDestination(index, x + i, y);
+			break;
+		}
+		else if (!collisionChecker(index, x, y - i))
+		{
+			setDestination(index, x, y - i);
+			break;
+		}
+		else if (!collisionChecker(index, x, y + i))
+		{
+			setDestination(index, x, y + i);
+			break;
+		}
+		else if (!collisionChecker(index, x + i, y + i))
+		{
+			setDestination(index, x + i, y + i);
+			break;
+		}
+		else if (!collisionChecker(index, x - i, y - i))
+		{
+			setDestination(index, x - i, y - i);
+			break;
+		}
+	}
+}
+
+void Game::setDestination(int index, int x, int y)
+{
+	cDestinations[index].x = x;
+	cDestinations[index].y = y;
+}
+
+bool Game::collisionChecker(int index, int x, int y)
+{
+	int mapIndex = y * LEVEL_WIDTH + x;
+	entityType type = entityMap[cCoordinates[index].y * LEVEL_WIDTH 
+		+ cCoordinates[index].x].type;
+	
+	if (entityMap[mapIndex].index == index) return false;
+	if (entityMap[mapIndex].type == type || entityMap[mapIndex].type == WATER)
+	{
+		return true;
+	} 
+	else return false;
+
+	/*
 	for (int i = 0; i < MAX_ENTITIES; ++i)
 	{
-		if ((componentCoordinates[i].x == x && componentCoordinates[i].y == y)
+		if ((cCoordinates[i].x == x && cCoordinates[i].y == y)
 		    || map.getType(y*LEVEL_WIDTH + x) == 0)
 		{
 			return true;
 		}
 	}
 	return false;
+	*/
 }
 
 void Game::cutTrees(int x, int y)

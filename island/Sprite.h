@@ -17,6 +17,7 @@ public:
 		int height, int numberOfFrames, int animationSpeed);
 	
 	void animate(int x, int y);
+	void setAlpha(Uint8 alpha);
 
 	int getWidth();
 	int getHeight();

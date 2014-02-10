@@ -4,12 +4,14 @@
 #include <SDL_image.h>
 
 #include <iostream>
-#include <string>
 #include <cstdlib>
 #include <ctime>
-#include <vector>
 #include <fstream>
 #include <algorithm>
+
+#include <string>
+#include <vector>
+#include <set>
 
 const int MAX_ENTITIES = 50;
 
@@ -61,15 +63,19 @@ typedef enum
 {
 	HERO,
 	TREE,
+} entityType;
+
+typedef enum
+{
 	WATER,
 	SAND,
-	LAND,
-	NONE
-} entityType;
+	LAND
+} terrainType;
 
 struct entityData
 {
 	int index;
-	entityType type;
+	terrainType terrain;
+	std::set<entityType> types;
 };
 

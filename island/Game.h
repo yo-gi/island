@@ -70,6 +70,9 @@ private:
 	std::vector<Velocity> cVelocities;
 
 	std::vector<Sprite> cSprites;
+	std::vector<entityType> cTypes;
+
+	bool findEntity(int index, entityType type);
 
 	//Selection
 	std::vector<int> selected;

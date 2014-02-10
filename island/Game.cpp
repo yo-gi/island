@@ -13,6 +13,7 @@ Game::Game()
 	cPositions.resize(MAX_ENTITIES);
 	cDestinations.resize(MAX_ENTITIES);
 	cCoordinates.resize(MAX_ENTITIES);
+	cTypes.resize(MAX_ENTITIES);
 
 	for (auto i : cMasks)
 	{
@@ -134,10 +135,10 @@ void Game::loadMap()
 
 	for(int i = 0; i < MAX_TILES; ++i)
 	{
-		entityMap[i].type = NONE;
-		if (map.getType(i) == TILE_WATER) entityMap[i].type = WATER;
-		if (map.getType(i) == TILE_SAND) entityMap[i].type = SAND;
-		if (map.getType(i) == TILE_LAND) entityMap[i].type = LAND;
+		//entityMap[i].type = NONE;
+		if (map.getType(i) == TILE_WATER) entityMap[i].terrain = WATER;
+		if (map.getType(i) == TILE_SAND) entityMap[i].terrain = SAND;
+		if (map.getType(i) == TILE_LAND) entityMap[i].terrain = LAND;
 
 		entityMap[i].index = -1;
 	}
@@ -164,6 +165,15 @@ void Game::destroyEntity(int i)
 	cMasks[i] = COMPONENT_NONE;
 	cCoordinates[i].x = NULL;
 	cCoordinates[i].y = NULL;
+}
+
+bool Game::findEntity(int index, entityType type)
+{
+	if ( entityMap[index].types.find(type) != entityMap[index].types.end() )
+	{
+		return true;
+	}
+	else return false;
 }
 
 void Game::eventHandler(SDL_Event& event)
@@ -331,8 +341,8 @@ void Game::updatePosition(int index, int x, int y)
 	int mapIndex = cCoordinates[index].y * LEVEL_WIDTH
 		+ cCoordinates[index].x;
 
-	entityType tempType = entityMap[mapIndex].type;
-	entityMap[mapIndex].type = NONE;
+	entityType tempType = cTypes[index];
+	entityMap[mapIndex].types.erase(tempType);
 	entityMap[mapIndex].index = -1;	
 
 	cCoordinates[index].x = x;
@@ -343,7 +353,7 @@ void Game::updatePosition(int index, int x, int y)
 	mapIndex = cCoordinates[index].y * LEVEL_WIDTH
 		+ cCoordinates[index].x;
 
-	entityMap[mapIndex].type = tempType;
+	entityMap[mapIndex].types.insert(tempType);
 	entityMap[mapIndex].index = index;
 }
 
@@ -353,52 +363,38 @@ void Game::createHero(int x, int y)
 	heroNums.push_back(heroNum);
 
 	cMasks[heroNum] = MOVEMENT_MASK | COMPONENT_SPRITE | COMPONENT_CLICKABLE;
-
-	updatePosition(heroNum, x, y);
-
-	/*	
-	cCoordinates[heroNum].x = x;
-	cCoordinates[heroNum].y = y;
-
-	cPositions[heroNum].x = TILE_WIDTH/4 + x*TILE_WIDTH;
-	cPositions[heroNum].y = TILE_WIDTH/4 + y*TILE_WIDTH;
-	*/
-
-	cDestinations[heroNum].x = x;
-	cDestinations[heroNum].y = y;
-
-	cVelocities[heroNum].x = 0;
-	cVelocities[heroNum].y = 0;
+	cTypes[heroNum] = HERO;
 
 	cSprites[heroNum].initialize("images/hero.png", 
 		32, 32, 1, 1);
 
-	entityMap[y * LEVEL_WIDTH + x].type = HERO;
+	entityMap[y * LEVEL_WIDTH + x].types.insert(HERO);
+
+	cDestinations[heroNum].x = x;
+	cDestinations[heroNum].y = y;
+
+	updatePosition(heroNum, x, y);
+
 }
 
 void Game::createTree(int x, int y)
 {
-	treeNums.push_back(createEntity());
+	int treeNum = createEntity();
+	treeNums.push_back(treeNum);
+
 	cMasks[treeNums.back()] = COMPONENT_SPRITE | COMPONENT_POSITION 
 		| COMPONENT_CLICKABLE;
+	cTypes[treeNum] = TREE;
 
-	updatePosition(treeNums.back(), x, y);
-	
-	/*
-	cPositions[treeNums.back()].x = TILE_WIDTH/4;
-	cPositions[treeNums.back()].y = TILE_WIDTH/4;
-
-	cCoordinates[treeNums.back()].x = x;
-	cCoordinates[treeNums.back()].y = y;
-	*/
-
-	cDestinations[treeNums.back()].x = x;
-	cDestinations[treeNums.back()].y = y;
-	
-	cSprites[treeNums.back()].initialize("images/tree.png", 
+	cSprites[treeNum].initialize("images/tree.png", 
 		32, 32, 1, 1);
 
-	entityMap[y * LEVEL_WIDTH + x].type = TREE;
+	entityMap[y * LEVEL_WIDTH + x].types.insert(TREE);
+
+	cDestinations[treeNum].x = x;
+	cDestinations[treeNum].y = y;
+
+	updatePosition(treeNum, x, y);
 }
 
 void Game::movementSystem()
@@ -430,7 +426,9 @@ void Game::movementSystem()
 
 	for (int i = 0; i < MAX_ENTITIES; ++i)
 	{
-		if (cMasks[i] & COMPONENT_DESTINATION == COMPONENT_DESTINATION)
+		if (cMasks[i] & COMPONENT_DESTINATION == COMPONENT_DESTINATION
+			&& !(cCoordinates[i].x == cDestinations[i].x 
+			&& cCoordinates[i].y == cDestinations[i].y))
 		{
 			if (collisionChecker(i, cDestinations[i].x, cDestinations[i].y))
 			{
@@ -473,7 +471,8 @@ void Game::selectionSystem()
 	{
 		for (int j = clickStart.y; j <= clickEnd.y; ++j)
 		{
-			if (entityMap[j * LEVEL_WIDTH + i].type == HERO)
+			if (findEntity(j * LEVEL_WIDTH + i, HERO))
+			//if (entityMap[j * LEVEL_WIDTH + i].type == HERO)
 			{
 				selected.push_back(entityMap[j * LEVEL_WIDTH + i].index);
 			}
@@ -577,11 +576,10 @@ void Game::setDestination(int index, int x, int y)
 bool Game::collisionChecker(int index, int x, int y)
 {
 	int mapIndex = y * LEVEL_WIDTH + x;
-	entityType type = entityMap[cCoordinates[index].y * LEVEL_WIDTH 
-		+ cCoordinates[index].x].type;
+	entityType type = cTypes[index];
 	
 	if (entityMap[mapIndex].index == index) return false;
-	if (entityMap[mapIndex].type == type || entityMap[mapIndex].type == WATER)
+	if (findEntity(mapIndex, type) || entityMap[mapIndex].terrain == WATER)
 	{
 		return true;
 	} 
@@ -602,6 +600,7 @@ bool Game::collisionChecker(int index, int x, int y)
 
 void Game::cutTrees(int x, int y)
 {
+	/*
 	int i = y*LEVEL_WIDTH+x+1;
 	if(i < MAX_TILES)
 	{
@@ -666,4 +665,5 @@ void Game::cutTrees(int x, int y)
 			destroyEntity(entityMap[i].index);
 		}
 	}
+	*/
 }

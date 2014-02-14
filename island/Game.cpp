@@ -443,8 +443,8 @@ void Game::movementSystem()
 
 bool Game::moveStep(int index, int destX, int destY)
 {
-	int curX = cPositions[index].x;
-	int curY = cPositions[index].y;
+	int curX = cPositions[index].x - TILE_WIDTH/4;
+	int curY = cPositions[index].y - TILE_WIDTH/4;
 
 	destX *= TILE_WIDTH;
 	destY *= TILE_WIDTH;

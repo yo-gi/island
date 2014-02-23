@@ -21,8 +21,8 @@ public:
 
 	//Background
 	void displayBackground();
-	void updateCamera(SDL_Rect& camera);
-	void centerCamera(int componentIndex, SDL_Rect& camera);
+	void updateCamera();
+	void centerCamera(int componentIndex);
 	
 	//Entity management
 	int createEntity();

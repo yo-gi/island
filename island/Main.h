@@ -50,7 +50,7 @@ typedef enum
 	COMPONENT_SPRITE = 1 << 2,
 	COMPONENT_CLICKABLE = 1 << 3,
 	COMPONENT_DESTINATION = 1 << 4,
-	COMPONENT_TEST = 1 << 5
+	COMPONENT_MINIMAP = 1 << 5
 
 } Component;
 

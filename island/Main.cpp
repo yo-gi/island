@@ -75,7 +75,7 @@ int main (int argc, char* args[]) {
 			game.eventHandler(event);
 		}
 
-		game.updateCamera(camera);
+		game.updateCamera();
 
 		SDL_RenderClear(mainRenderer);
 

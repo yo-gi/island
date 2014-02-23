@@ -12,8 +12,10 @@ Game::Game()
 	cSprites.resize(MAX_ENTITIES);
 	cPositions.resize(MAX_ENTITIES);
 	cDestinations.resize(MAX_ENTITIES);
+	cPaths.resize(MAX_ENTITIES);
 	cCoordinates.resize(MAX_ENTITIES);
 	cTypes.resize(MAX_ENTITIES);
+	pathMap.resize(MAX_TILES);
 
 	for (auto i : cMasks)
 	{
@@ -69,7 +71,7 @@ bool Game::initialize()
 		return false; 
 	}
 	
-	mainRenderer = SDL_CreateRenderer(mainWindow, -1, 
+	mainRenderer = SDL_CreateRenderer(mainWindow, -1,
 		SDL_RENDERER_ACCELERATED);
 
 	if (mainRenderer == NULL)
@@ -185,45 +187,13 @@ void Game::eventHandler(SDL_Event& event)
 	{
 		switch(event.key.keysym.sym)
 		{
-			/*case SDLK_w:
-				if(!collisionChecker(cCoordinates[heroNum].x,
-				    cCoordinates[heroNum].y - HERO_VEL))
-				{
-					updatePosition(heroNum, cCoordinates[heroNum].x, 
-						cCoordinates[heroNum].y - HERO_VEL);
-				}
-				break;
-			case SDLK_s:
-				if(!collisionChecker(cCoordinates[heroNum].x,
-				    cCoordinates[heroNum].y + HERO_VEL))
-				{
-					updatePosition(heroNum, cCoordinates[heroNum].x, 
-						cCoordinates[heroNum].y + HERO_VEL);
-				}
-				break;
-			case SDLK_a:
-				if(!collisionChecker(cCoordinates[heroNum].x - HERO_VEL,
-				    cCoordinates[heroNum].y))
-				{
-					updatePosition(heroNum, cCoordinates[heroNum].x - HERO_VEL, 
-						cCoordinates[heroNum].y);
-				}
-				break;
-			case SDLK_d:
-				if(!collisionChecker(cCoordinates[heroNum].x + HERO_VEL,
-				    cCoordinates[heroNum].y))
-				{
-					updatePosition(heroNum, cCoordinates[heroNum].x + HERO_VEL, 
-						cCoordinates[heroNum].y);
-				}
-				break;
 			case SDLK_SPACE:
-				centerCamera(heroNum, camera);
+				if(!selected.empty())
+				{
+					//make better choices than selected.front
+					centerCamera(selected.front());
+				}
 				break;
-			case SDLK_c:
-				cutTrees(cCoordinates[heroNum].x, cCoordinates[heroNum].y);
-				break;
-			*/
 		}
 	}	
 
@@ -242,16 +212,7 @@ void Game::eventHandler(SDL_Event& event)
 
 		if (event.button.button == SDL_BUTTON_RIGHT)
 		{
-			//cout << "size: " << selected.size() << endl;
 			assignDestinations(mouseCoordinate.x, mouseCoordinate.y);
-			/*if (!selected.empty())
-			{
-				for (int i = 0; i < selected.size(); ++i)
-				{
-					updatePosition(selected.back(), mouseCoordinate.x, 
-						mouseCoordinate.y);
-				}	
-			}*/
 		}
 	}
 
@@ -270,38 +231,14 @@ void Game::eventHandler(SDL_Event& event)
 
 		}
 	}
-/*
-	if (cCoordinates[heroNum].x < 0) cCoordinates[heroNum].x += HERO_VEL;
-	if (cCoordinates[heroNum].x > LEVEL_WIDTH - 1) cCoordinates[heroNum].x -= HERO_VEL;
-	if (cCoordinates[heroNum].y < 0) cCoordinates[heroNum].y += HERO_VEL;
-	if (cCoordinates[heroNum].y > LEVEL_HEIGHT - 1) cCoordinates[heroNum].y -= HERO_VEL;
-*/
 }
 
-void Game::centerCamera(int componentIndex, SDL_Rect& camera)
+void Game::centerCamera(int componentIndex)
 {
-	/*
 	camera.x = cCoordinates[componentIndex].x*TILE_WIDTH
 	+ TILE_WIDTH/2 - SCREEN_WIDTH/2;
 	camera.y = cCoordinates[componentIndex].y*TILE_WIDTH
 	+ TILE_WIDTH/2 - SCREEN_HEIGHT/2;
-
-	if (cCoordinates[heroNum].x < 0) 
-		cCoordinates[heroNum].x += HERO_VEL;
-
-	if (cCoordinates[heroNum].x > LEVEL_WIDTH - 1) 
-		cCoordinates[heroNum].x -= HERO_VEL;
-	
-	if (cCoordinates[heroNum].y < 0) 
-		cCoordinates[heroNum].y += HERO_VEL;
-	
-	if (cCoordinates[heroNum].y > LEVEL_HEIGHT - 1) 
-		cCoordinates[heroNum].y -= HERO_VEL;
-
-	//cout << cCoordinates[heroNum].x << ", " << cCoordinates[heroNum].y << endl;
-	cout << mouse.x << ", " << mouse.y << ", " << mouseCoordinate.x << ", ";
-	cout << mouseCoordinate.y << endl;
-	*/
 }
 
 void Game::mouseHandler()
@@ -312,7 +249,7 @@ void Game::mouseHandler()
 	mouseCoordinate.y = (mouse.y + camera.y) / TILE_WIDTH;
 }
 
-void Game::updateCamera(SDL_Rect& camera)
+void Game::updateCamera()
 {
 
 	if (mouse.x < 10) 				camera.x -= CAMERA_VEL;
@@ -362,7 +299,8 @@ void Game::createHero(int x, int y)
 	int heroNum = createEntity();
 	heroNums.push_back(heroNum);
 
-	cMasks[heroNum] = MOVEMENT_MASK | COMPONENT_SPRITE | COMPONENT_CLICKABLE;
+	cMasks[heroNum] = MOVEMENT_MASK | COMPONENT_SPRITE |
+					  COMPONENT_CLICKABLE | COMPONENT_MINIMAP | COMPONENT_PATH;
 	cTypes[heroNum] = HERO;
 
 	cSprites[heroNum].initialize("images/hero.png", 
@@ -383,7 +321,7 @@ void Game::createTree(int x, int y)
 	treeNums.push_back(treeNum);
 
 	cMasks[treeNums.back()] = COMPONENT_SPRITE | COMPONENT_POSITION 
-		| COMPONENT_CLICKABLE;
+		| COMPONENT_CLICKABLE | COMPONENT_MINIMAP;
 	cTypes[treeNum] = TREE;
 
 	cSprites[treeNum].initialize("images/tree.png", 
@@ -399,35 +337,10 @@ void Game::createTree(int x, int y)
 
 void Game::movementSystem()
 {
-	/*for (int i = 0; i < MAX_ENTITIES; ++i)
-	{
-		if ((cMasks[i] & MOVEMENT_MASK) == MOVEMENT_MASK)
-		{
-			cPositions[i].x += cVelocities[i].x;
-			cPositions[i].y += cVelocities[i].y;
-		}
-
-		if (cPositions[i].y < 0 || cPositions[i].y > 
-			(LEVEL_HEIGHT*TILE_WIDTH - cSprites[i].getHeight()))
-		{
-			cPositions[i].y -= cVelocities[i].y;
-		}
-
-		if (cPositions[i].x < 0 || cPositions[i].x >
-			(LEVEL_WIDTH*TILE_WIDTH - cSprites[i].getHeight()))
-		{
-			cPositions[i].x -= cVelocities[i].x;
-		}
-
-		cPositions[i].x = TILE_WIDTH * cCoordinates[i].x + TILE_WIDTH/4;
-		cPositions[i].y = TILE_WIDTH * cCoordinates[i].y + TILE_WIDTH/4;	
-	}
-	*/
-
 	for (int i = 0; i < MAX_ENTITIES; ++i)
 	{
 		if (cMasks[i] & COMPONENT_DESTINATION == COMPONENT_DESTINATION
-			&& !(cCoordinates[i].x == cDestinations[i].x 
+			&& !(cCoordinates[i].x == cDestinations[i].x
 			&& cCoordinates[i].y == cDestinations[i].y))
 		{
 			if (collisionChecker(i, cDestinations[i].x, cDestinations[i].y))
@@ -435,8 +348,12 @@ void Game::movementSystem()
 				updateDestination(i, cDestinations[i].x, cDestinations[i].y);
 			}
 
-			if (moveStep(i, cDestinations[i].x, cDestinations[i].y))
-				updatePosition(i, cDestinations[i].x, cDestinations[i].y);
+			if (!cPaths[i].empty() 
+				&& moveStep(i, cPaths[i].top().x, cPaths[i].top().y))
+			{
+				updatePosition(i, cPaths[i].top().x, cPaths[i].top().y);
+				cPaths[i].pop();
+			}
 		}
 	}
 }
@@ -462,10 +379,14 @@ void Game::animationSystem()
 {
 	for (int i = 0; i < MAX_ENTITIES; ++i)
 	{
-		if (cMasks[i] & COMPONENT_SPRITE == COMPONENT_SPRITE)
+		if ((cMasks[i] & COMPONENT_SPRITE) == COMPONENT_SPRITE)
 		{
-			cSprites[i].animate(cPositions[i].x - camera.x, 
+			cSprites[i].animate(cPositions[i].x - camera.x,
 				cPositions[i].y - camera.y);
+		}
+		if ((cMasks[i] & COMPONENT_MINIMAP) == COMPONENT_MINIMAP)
+		{
+			//render to minimap
 		}
 	}
 
@@ -498,48 +419,136 @@ void Game::selectionSystem()
 	}
 }
 
+void Game::addToOpen(TileQueue* openNodes, int currentIndex, int index)
+{
+	if (entityMap[index].terrain != WATER && index > 0 && index < MAX_TILES - 1)
+	{
+		SDL_Point current;
+		current.x = currentIndex % LEVEL_WIDTH;
+		current.y = currentIndex / LEVEL_WIDTH;
+
+		SDL_Point end;
+		end.x = index % LEVEL_WIDTH;
+		end.y = index / LEVEL_WIDTH;
+
+		int cost = pathMap[currentIndex].exactCost + diagDist(current, end);
+		if (pathMap[index].isInOpen && cost < pathMap[index].exactCost)
+		{
+			pathMap[index].isInOpen = false;
+		}
+		if (pathMap[index].isInClosed && cost < pathMap[index].exactCost)
+		{
+			pathMap[index].isInClosed = false;
+		}
+		if (!pathMap[index].isInOpen && !pathMap[index].isInClosed)
+		{
+			pathMap[index].exactCost = cost;
+			pathMap[index].isInOpen = true;
+			pathMap[index].parentIndex = currentIndex;
+			openNodes->push(&pathMap[index]);
+		}
+	}
+}
+
+void Game::calclulatePath(int startIndex, int heroIndex)
+{
+	for (int i = 0; i < MAX_TILES; ++i)
+	{
+		pathMap[i].index = i;
+		pathMap[i].parentIndex = 0;
+		pathMap[i].isInOpen = false;
+		pathMap[i].isInClosed = false;
+		pathMap[i].exactCost = 0;
+		pathMap[i].estimatedCost = 0;
+	}
+
+	TileQueue openNodes;
+	int destination = cDestinations[heroIndex].y * LEVEL_WIDTH
+					+ cDestinations[heroIndex].x;
+
+	pathMap[startIndex].isInOpen = true;
+	openNodes.push(&pathMap[startIndex]);
+
+	while (!openNodes.empty() && openNodes.top()->index != destination)
+	{
+		while (openNodes.top()->isInOpen == false) openNodes.pop();
+
+		searchTile* current = openNodes.top();
+		int currentIndex = current->index;
+		current->isInOpen = false;
+		current->isInClosed = true;
+		openNodes.pop();
+
+		addToOpen(&openNodes, currentIndex, currentIndex + 1);
+		addToOpen(&openNodes, currentIndex, currentIndex - 1);
+		addToOpen(&openNodes, currentIndex, currentIndex + LEVEL_HEIGHT);
+		addToOpen(&openNodes, currentIndex, currentIndex - LEVEL_HEIGHT);
+		addToOpen(&openNodes, currentIndex, currentIndex + LEVEL_HEIGHT + 1);
+		addToOpen(&openNodes, currentIndex, currentIndex - LEVEL_HEIGHT - 1);
+		addToOpen(&openNodes, currentIndex, currentIndex + LEVEL_HEIGHT - 1);
+		addToOpen(&openNodes, currentIndex, currentIndex - LEVEL_HEIGHT + 1);
+	}
+
+	int tempIndex = openNodes.top()->index;
+	SDL_Point tempPoint;
+
+	while (tempIndex != startIndex)
+	{
+		tempPoint.x = tempIndex % LEVEL_WIDTH;
+		tempPoint.y = tempIndex / LEVEL_WIDTH;
+
+		cPaths[heroIndex].push(tempPoint);
+		tempIndex = pathMap[tempIndex].parentIndex;
+	}
+
+}
+
 void Game::assignDestinations(int x, int y)
 {
-	for (auto hero : selected)
+	for (int i = 0; i < selected.size(); ++i)
 	{
 		for (int i = 0; i < LEVEL_WIDTH - x; ++i)
 		{
-			if (!collisionChecker(hero, x, y))
+			if (!collisionChecker(selected[i], x, y))
 			{
-				setDestination(hero, x, y);
+				setDestination(selected[i], x, y);
 				break;
 			}
-			else if (!collisionChecker(hero, x - i, y))
+			else if (!collisionChecker(selected[i], x - i, y))
 			{
-				setDestination(hero, x - i, y);
+				setDestination(selected[i], x - i, y);
 				break;
 			}
-			else if (!collisionChecker(hero, x + i, y))
+			else if (!collisionChecker(selected[i], x + i, y))
 			{
-				setDestination(hero, x + i, y);
+				setDestination(selected[i], x + i, y);
 				break;
 			}
-			else if (!collisionChecker(hero, x, y - i))
+			else if (!collisionChecker(selected[i], x, y - i))
 			{
-				setDestination(hero, x, y - i);
+				setDestination(selected[i], x, y - i);
 				break;
 			}
-			else if (!collisionChecker(hero, x, y + i))
+			else if (!collisionChecker(selected[i], x, y + i))
 			{
-				setDestination(hero, x, y + i);
+				setDestination(selected[i], x, y + i);
 				break;
 			}
-			else if (!collisionChecker(hero, x + i, y + i))
+			else if (!collisionChecker(selected[i], x + i, y + i))
 			{
-				setDestination(hero, x + i, y + i);
+				setDestination(selected[i], x + i, y + i);
 				break;
 			}
-			else if (!collisionChecker(hero, x - i, y - i))
+			else if (!collisionChecker(selected[i], x - i, y - i))
 			{
-				setDestination(hero, x - i, y - i);
+				setDestination(selected[i], x - i, y - i);
 				break;
 			}
 		}
+
+		int startIndex = cCoordinates[selected[i]].y * LEVEL_WIDTH + 
+						 cCoordinates[selected[i]].x;
+		calclulatePath(startIndex, selected[i]);
 	}
 }
 
@@ -583,6 +592,10 @@ void Game::updateDestination(int index, int x, int y)
 			break;
 		}
 	}
+
+	int startIndex = cCoordinates[index].y * LEVEL_WIDTH + 
+					 cCoordinates[index].x;
+	calclulatePath(startIndex, index);
 }
 
 void Game::setDestination(int index, int x, int y)
@@ -595,7 +608,6 @@ bool Game::collisionChecker(int index, int x, int y)
 {
 	if (y < 0 || y >= LEVEL_HEIGHT) return true;
 	if (x < 0 || x >= LEVEL_WIDTH) return true;
-
 
 	int mapIndex = y * LEVEL_WIDTH + x;
 	entityType type = cTypes[index];

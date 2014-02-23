@@ -1,11 +1,19 @@
-﻿Build started 2/18/2014 3:09:33 PM.
+﻿Build started 2/23/2014 6:01:01 PM.
      1>Project "C:\Users\Yogesh\Documents\Visual Studio 2012\Projects\island\island\island.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Game.cpp Main.cpp Map.cpp Sprite.cpp Texture.cpp Tile.cpp Velocity.cpp
          Game.cpp
-     1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(227): warning C4060: switch statement contains no 'case' or 'default' labels
-     1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(430): warning C4554: '&' : check operator precedence for possible error; use parentheses to clarify precedence
-     1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(465): warning C4554: '&' : check operator precedence for possible error; use parentheses to clarify precedence
+     1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(343): warning C4554: '&' : check operator precedence for possible error; use parentheses to clarify precedence
+     1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(508): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(549): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(510) : definition of 'i' ignored
+                 c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(508) : definition of 'i' used
+     1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(550): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(510) : definition of 'i' ignored
+                 c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(508) : definition of 'i' used
+     1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(551): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(510) : definition of 'i' ignored
+                 c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(508) : definition of 'i' used
          Generating Code...
          Skipping... (no relevant changes detected)
          Velocity.cpp
@@ -27,4 +35,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:13.35
+Time Elapsed 00:00:02.24

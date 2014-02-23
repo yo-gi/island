@@ -75,7 +75,7 @@ int main (int argc, char* args[]) {
 			game.eventHandler(event);
 		}
 
-		game.updateCamera(camera);
+		game.updateCamera();
 
 		SDL_RenderClear(mainRenderer);
 
@@ -121,4 +121,12 @@ bool checkCollision(SDL_Rect one, SDL_Rect two)
 int manDist(SDL_Point one, SDL_Point two)
 {
 	return abs(one.x - two.x) + abs(one.y - two.y);
+}
+
+int diagDist(SDL_Point one, SDL_Point two)
+{
+	int dx = abs(one.x - two.x);
+	int dy = abs(one.y - two.y);
+
+	return 1 * max(dx, dy);
 }

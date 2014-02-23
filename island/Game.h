@@ -21,8 +21,8 @@ public:
 
 	//Background
 	void displayBackground();
-	void updateCamera(SDL_Rect& camera);
-	void centerCamera(int componentIndex, SDL_Rect& camera);
+	void updateCamera();
+	void centerCamera(int componentIndex);
 	
 	//Entity management
 	int createEntity();
@@ -55,6 +55,12 @@ private:
 	void updateDestination(int index, int x, int y);
 	bool moveStep(int index, int destX, int destY);
 
+	//A* pathfinding
+	void calclulatePath(int startIndex, int heroIndex);
+	void addToOpen(TileQueue* openNodes, int currentIndex, int index);
+	std::vector<searchTile> pathMap;
+
+
 	//Textures and Sprites
 	Texture tileTexture;
 	Sprite selectSprite;
@@ -70,6 +76,7 @@ private:
 	std::vector<SDL_Point> cPositions;
 	std::vector<SDL_Point> cCoordinates;
 	std::vector<SDL_Point> cDestinations;
+	std::vector<std::stack<SDL_Point>> cPaths;
 	std::vector<Velocity> cVelocities;
 	std::vector<Sprite> cSprites;
 	std::vector<entityType> cTypes;
@@ -91,8 +98,5 @@ private:
 	//Camera
 	int cameraVelX;
 	int cameraVelY;
-
-	
-
 };
 

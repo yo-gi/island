@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <queue>
+#include <stack>
 
 extern SDL_Renderer* mainRenderer;
 extern SDL_Window* mainWindow;
@@ -19,13 +21,14 @@ extern SDL_Window* mainWindow;
 extern SDL_Rect camera;
 
 const int MAX_ENTITIES = 50;
+const int TILE_WIDTH = 64; //pixels
+
 
 const int LEVEL_WIDTH = 16;
 const int LEVEL_HEIGHT = 16;
 const int SCREEN_HEIGHT = TILE_WIDTH*13;
 const int SCREEN_WIDTH = TILE_WIDTH*13;
 
-const int TILE_WIDTH = 64; //pixels
 
 const int MAX_TILE_TYPES = 3;
 const int MAX_TILES = LEVEL_HEIGHT * LEVEL_WIDTH;
@@ -37,6 +40,16 @@ const int TILE_WATER = 0;
 const int TILE_SAND = 1;
 const int TILE_LAND = 2;
 
+struct searchTile
+{
+	int index;
+	int parentIndex;
+	bool isInOpen;
+	bool isInClosed;
+	int exactCost;
+	int estimatedCost;
+};
+
 typedef enum
 {
 	COMPONENT_NONE = 0,
@@ -45,7 +58,8 @@ typedef enum
 	COMPONENT_SPRITE = 1 << 2,
 	COMPONENT_CLICKABLE = 1 << 3,
 	COMPONENT_DESTINATION = 1 << 4,
-	COMPONENT_TEST = 1 << 5
+	COMPONENT_PATH = 1 << 5,
+	COMPONENT_MINIMAP = 1 << 6
 
 } Component;
 
@@ -71,7 +85,21 @@ struct entityData
 	std::set<entityType> types;
 };
 
+struct pathComparator
+{
+	bool operator() (const searchTile* one, const searchTile* two) const
+	{
+		if (one->exactCost + one->estimatedCost < 
+			two->exactCost + two->estimatedCost) return true;
+		else return false;
+	}
+};
+
 bool checkCollision(SDL_Rect one, SDL_Rect two);
 int manDist(SDL_Point one, SDL_Point two);
+int diagDist(SDL_Point one, SDL_Point two);
+
+typedef std::priority_queue<searchTile*, std::vector<searchTile*>, 
+	pathComparator> TileQueue;
 
 

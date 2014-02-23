@@ -1,11 +1,19 @@
-﻿Build started 2/10/2014 4:43:12 PM.
+﻿Build started 2/18/2014 3:09:33 PM.
      1>Project "C:\Users\Yogesh\Documents\Visual Studio 2012\Projects\island\island\island.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Game.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Game.cpp Main.cpp Map.cpp Sprite.cpp Texture.cpp Tile.cpp Velocity.cpp
          Game.cpp
      1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(227): warning C4060: switch statement contains no 'case' or 'default' labels
      1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(430): warning C4554: '&' : check operator precedence for possible error; use parentheses to clarify precedence
      1>c:\users\yogesh\documents\visual studio 2012\projects\island\island\game.cpp(465): warning C4554: '&' : check operator precedence for possible error; use parentheses to clarify precedence
+         Generating Code...
+         Skipping... (no relevant changes detected)
+         Velocity.cpp
+         Tile.cpp
+         Texture.cpp
+         Sprite.cpp
+         Map.cpp
+         Main.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Yogesh\Documents\Visual Studio 2012\Projects\island\Debug\island.exe" /INCREMENTAL /NOLOGO SDL2.lib SDL2main.lib SDL2_image.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Yogesh\Documents\Visual Studio 2012\Projects\island\Debug\island.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Yogesh\Documents\Visual Studio 2012\Projects\island\Debug\island.lib" /MACHINE:X86 Debug\Game.obj
          Debug\Main.obj
@@ -19,4 +27,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.70
+Time Elapsed 00:00:13.35

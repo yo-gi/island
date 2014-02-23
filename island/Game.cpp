@@ -593,6 +593,10 @@ void Game::setDestination(int index, int x, int y)
 
 bool Game::collisionChecker(int index, int x, int y)
 {
+	if (y < 0 || y >= LEVEL_HEIGHT) return true;
+	if (x < 0 || x >= LEVEL_WIDTH) return true;
+
+
 	int mapIndex = y * LEVEL_WIDTH + x;
 	entityType type = cTypes[index];
 	

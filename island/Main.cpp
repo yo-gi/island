@@ -80,6 +80,7 @@ int main (int argc, char* args[]) {
 		SDL_RenderClear(mainRenderer);
 
 		game.displayBackground();
+		game.displayMinimap();
 		game.animationSystem();
 		game.movementSystem();
 

@@ -21,6 +21,7 @@ public:
 
 	//Background
 	void displayBackground();
+	void displayMinimap();
 	void updateCamera();
 	void centerCamera(int componentIndex);
 	
@@ -63,6 +64,7 @@ private:
 
 	//Textures and Sprites
 	Texture tileTexture;
+	Sprite minimapSprite;
 	Sprite selectSprite;
 	Sprite mouseSprite;
 

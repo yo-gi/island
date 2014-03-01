@@ -108,6 +108,12 @@ bool Game::loadMedia()
 	}
 	else selectSprite.setAlpha(127);
 
+	if (!mouseSprite.initialize("images/minimap.png",
+	    MINIMAP_WIDTH, MINIMAP_HEIGHT, 1, 1))
+	{
+		cout << "Couldn't load minimap texture\n";
+		return false;
+	}
 	return true;
 }
 
@@ -125,6 +131,12 @@ void Game::destruct()
 void Game::displayBackground()
 {
 	map.renderMap();
+}
+
+void Game::displayMinimap()
+{
+	/*selectSprite.animate(i * TILE_WIDTH - camera.x, 
+	j * TILE_WIDTH - camera.y);*/
 }
 
 void Game::loadMap()

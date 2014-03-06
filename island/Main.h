@@ -29,7 +29,7 @@ const int LEVEL_HEIGHT = 16;
 const int SCREEN_HEIGHT = TILE_WIDTH*13;
 const int SCREEN_WIDTH = TILE_WIDTH*13;
 
-const int MINIMAP_WIDTH = 320;
+const int MINIMAP_WIDTH = 256;
 const int MINIMAP_HEIGHT = 256;
 
 const int MAX_TILE_TYPES = 3;

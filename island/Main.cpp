@@ -78,11 +78,10 @@ int main (int argc, char* args[]) {
 		game.updateCamera();
 
 		SDL_RenderClear(mainRenderer);
-
 		game.displayBackground();
-		game.displayMinimap();
 		game.animationSystem();
 		game.movementSystem();
+		game.displayMinimap();
 
 		SDL_RenderPresent(mainRenderer);
 

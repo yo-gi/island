@@ -82,6 +82,7 @@ private:
 	std::vector<Velocity> cVelocities;
 	std::vector<Sprite> cSprites;
 	std::vector<entityType> cTypes;
+	std::vector<Sprite> cMinimapSprites;
 
 	bool findEntity(int index, entityType type);
 

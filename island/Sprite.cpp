@@ -31,6 +31,8 @@ bool Sprite::initialize(std::string path, int width,
 
 void Sprite::animate(int x, int y) 
 {
+	//get ready for COMMENTS YO
+	//
 	SDL_Rect srcRect;
 
 	srcRect.x = frame.x + ((currentFrame / speed) * frame.w);

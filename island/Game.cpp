@@ -15,6 +15,8 @@ Game::Game()
 	cPaths.resize(MAX_ENTITIES);
 	cCoordinates.resize(MAX_ENTITIES);
 	cTypes.resize(MAX_ENTITIES);
+	cMinimapSprites.resize(MAX_ENTITIES);
+
 	pathMap.resize(MAX_TILES);
 
 	for (auto i : cMasks)
@@ -108,7 +110,7 @@ bool Game::loadMedia()
 	}
 	else selectSprite.setAlpha(127);
 
-	if (!mouseSprite.initialize("images/minimap.png",
+	if (!minimapSprite.initialize("images/minimap.png",
 	    MINIMAP_WIDTH, MINIMAP_HEIGHT, 1, 1))
 	{
 		cout << "Couldn't load minimap texture\n";
@@ -135,8 +137,20 @@ void Game::displayBackground()
 
 void Game::displayMinimap()
 {
-	/*selectSprite.animate(i * TILE_WIDTH - camera.x, 
-	j * TILE_WIDTH - camera.y);*/
+	minimapSprite.animate(SCREEN_WIDTH - MINIMAP_WIDTH, 0);
+	for (int i = 0; i < MAX_ENTITIES; ++i)
+	{
+		if ((cMasks[i] & COMPONENT_MINIMAP) == COMPONENT_MINIMAP)
+		{
+			//render to minimap
+			int xposition = cPositions[i].x*MINIMAP_WIDTH
+			/(LEVEL_WIDTH*TILE_WIDTH);
+			int yposition = cPositions[i].y*MINIMAP_HEIGHT
+			/(LEVEL_HEIGHT*TILE_WIDTH);
+			cMinimapSprites[i].animate
+			(xposition + SCREEN_WIDTH - MINIMAP_WIDTH, yposition);
+		}
+	}
 }
 
 void Game::loadMap()
@@ -318,6 +332,9 @@ void Game::createHero(int x, int y)
 	cSprites[heroNum].initialize("images/hero.png", 
 		32, 32, 1, 1);
 
+	cMinimapSprites[heroNum].initialize
+	("images/minimap_hero.png", 16, 16, 1, 1);
+
 	entityMap[y * LEVEL_WIDTH + x].types.insert(HERO);
 
 	cDestinations[heroNum].x = x;
@@ -395,10 +412,6 @@ void Game::animationSystem()
 		{
 			cSprites[i].animate(cPositions[i].x - camera.x,
 				cPositions[i].y - camera.y);
-		}
-		if ((cMasks[i] & COMPONENT_MINIMAP) == COMPONENT_MINIMAP)
-		{
-			//render to minimap
 		}
 	}
 

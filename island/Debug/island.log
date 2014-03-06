@@ -1,43 +1,33 @@
-﻿Build started 3/1/2014 6:15:31 PM.
-     1>Project "C:\Users\Jonathan\Documents\Visual Studio 2012\Projects\island\island\island.vcxproj" on node 2 (Build target(s)).
+﻿Build started 3/6/2014 4:20:29 PM.
+     1>Project "C:\Users\Jonathan\Documents\Visual Studio 2013\Projects\island\island\island.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Game.cpp Main.cpp Map.cpp Sprite.cpp Texture.cpp Tile.cpp Velocity.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Game.cpp Main.cpp
          Main.cpp
-     1>c:\users\jonathan\documents\visual studio 2012\projects\island\island\main.cpp(16): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>c:\users\jonathan\documents\visual studio 2013\projects\island\island\main.cpp(16): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
          Game.cpp
-     1>c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(355): warning C4554: '&' : check operator precedence for possible error; use parentheses to clarify precedence
-     1>c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(520): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(561): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
-                 c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(522) : definition of 'i' ignored
-                 c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(520) : definition of 'i' used
-     1>c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(562): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
-                 c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(522) : definition of 'i' ignored
-                 c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(520) : definition of 'i' used
-     1>c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(563): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
-                 c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(522) : definition of 'i' ignored
-                 c:\users\jonathan\documents\visual studio 2012\projects\island\island\game.cpp(520) : definition of 'i' used
-         Generating Code...
-         Compiling...
-         Velocity.cpp
-         Tile.cpp
-         Texture.cpp
-         Sprite.cpp
-         Map.cpp
-     1>c:\users\jonathan\documents\visual studio 2012\projects\island\island\map.cpp(7): warning C4101: 'y' : unreferenced local variable
-     1>c:\users\jonathan\documents\visual studio 2012\projects\island\island\map.cpp(7): warning C4101: 'x' : unreferenced local variable
+     1>c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(372): warning C4554: '&' : check operator precedence for possible error; use parentheses to clarify precedence
+     1>c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(533): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(574): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(535) : definition of 'i' ignored
+                 c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(533) : definition of 'i' used
+     1>c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(575): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(535) : definition of 'i' ignored
+                 c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(533) : definition of 'i' used
+     1>c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(576): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(535) : definition of 'i' ignored
+                 c:\users\jonathan\documents\visual studio 2013\projects\island\island\game.cpp(533) : definition of 'i' used
          Generating Code...
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Jonathan\Documents\Visual Studio 2012\Projects\island\Debug\island.exe" /INCREMENTAL /NOLOGO SDL2.lib SDL2main.lib SDL2_image.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Jonathan\Documents\Visual Studio 2012\Projects\island\Debug\island.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Jonathan\Documents\Visual Studio 2012\Projects\island\Debug\island.lib" /MACHINE:X86 Debug\Game.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Jonathan\Documents\Visual Studio 2013\Projects\island\Debug\island.exe" /INCREMENTAL /NOLOGO SDL2.lib SDL2main.lib SDL2_image.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Jonathan\Documents\Visual Studio 2013\Projects\island\Debug\island.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Jonathan\Documents\Visual Studio 2013\Projects\island\Debug\island.lib" /MACHINE:X86 Debug\Game.obj
          Debug\Main.obj
          Debug\Map.obj
          Debug\Sprite.obj
          Debug\Texture.obj
          Debug\Tile.obj
          Debug\Velocity.obj
-     1>MSVCRTD.lib(cinitexe.obj) : warning LNK4098: defaultlib 'msvcrt.lib' conflicts with use of other libs; use /NODEFAULTLIB:library
-         island.vcxproj -> C:\Users\Jonathan\Documents\Visual Studio 2012\Projects\island\Debug\island.exe
-     1>Done Building Project "C:\Users\Jonathan\Documents\Visual Studio 2012\Projects\island\island\island.vcxproj" (Build target(s)).
+         island.vcxproj -> C:\Users\Jonathan\Documents\Visual Studio 2013\Projects\island\Debug\island.exe
+     1>Done Building Project "C:\Users\Jonathan\Documents\Visual Studio 2013\Projects\island\island\island.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:06.80
+Time Elapsed 00:00:08.20

@@ -220,6 +220,13 @@ void Game::eventHandler(SDL_Event& event)
 					centerCamera(selected.front());
 				}
 				break;
+			case SDLK_c:
+				for(int i = 0; i < int(heroNums.size()); ++i)
+				{
+					cutTrees(cCoordinates[heroNums[i]].x,
+						cCoordinates[heroNums[i]].y);
+				}
+				break;
 		}
 	}	
 
@@ -647,11 +654,10 @@ bool Game::collisionChecker(int index, int x, int y)
 
 void Game::cutTrees(int x, int y)
 {
-	/*
 	int i = y*LEVEL_WIDTH+x+1;
 	if(i < MAX_TILES)
 	{
-		if(entityMap[i].type == TREE)
+		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
 			destroyEntity(entityMap[i].index);
 		}
@@ -659,7 +665,7 @@ void Game::cutTrees(int x, int y)
 	i = (y+1)*LEVEL_WIDTH+x+1;
 	if(i < MAX_TILES)
 	{
-		if(entityMap[i].type == TREE)
+		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
 			destroyEntity(entityMap[i].index);
 		}
@@ -667,7 +673,7 @@ void Game::cutTrees(int x, int y)
 	i = (y-1)*LEVEL_WIDTH+x+1;
 	if(i < MAX_TILES)
 	{
-		if(entityMap[i].type == TREE)
+		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
 			destroyEntity(entityMap[i].index);
 		}
@@ -675,7 +681,7 @@ void Game::cutTrees(int x, int y)
 	i = y*LEVEL_WIDTH+x-1;
 	if(i < MAX_TILES)
 	{
-		if(entityMap[i].type == TREE)
+		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
 			destroyEntity(entityMap[i].index);
 		}
@@ -683,7 +689,7 @@ void Game::cutTrees(int x, int y)
 	i = (y+1)*LEVEL_WIDTH+x-1;
 	if(i < MAX_TILES)
 	{
-		if(entityMap[i].type == TREE)
+		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
 			destroyEntity(entityMap[i].index);
 		}
@@ -691,7 +697,7 @@ void Game::cutTrees(int x, int y)
 	i = (y-1)*LEVEL_WIDTH+x-1;
 	if(i < MAX_TILES)
 	{
-		if(entityMap[i].type == TREE)
+		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
 			destroyEntity(entityMap[i].index);
 		}
@@ -699,7 +705,7 @@ void Game::cutTrees(int x, int y)
 	i = (y+1)*LEVEL_WIDTH+x;
 	if(i < MAX_TILES)
 	{
-		if(entityMap[i].type == TREE)
+		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
 			destroyEntity(entityMap[i].index);
 		}
@@ -707,10 +713,9 @@ void Game::cutTrees(int x, int y)
 	i = (y-1)*LEVEL_WIDTH+x;
 	if(i < MAX_TILES)
 	{
-		if(entityMap[i].type == TREE)
+		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
 			destroyEntity(entityMap[i].index);
 		}
 	}
-	*/
 }

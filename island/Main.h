@@ -2,11 +2,13 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 
 #include <string>
@@ -31,6 +33,9 @@ const int SCREEN_WIDTH = TILE_WIDTH*13;
 
 const int MINIMAP_WIDTH = 256;
 const int MINIMAP_HEIGHT = 256;
+
+const int DESCRIPTION_WIDTH = 256;
+const int DESCRIPTION_HEIGHT = 192;
 
 const int MAX_TILE_TYPES = 3;
 const int MAX_TILES = LEVEL_HEIGHT * LEVEL_WIDTH;
@@ -82,7 +87,8 @@ typedef enum
 
 struct entityData
 {
-	int index;
+	int heroIndex;
+	int treeIndex;
 	terrainType terrain;
 	std::set<entityType> types;
 };

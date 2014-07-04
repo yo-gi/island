@@ -21,9 +21,12 @@ public:
 
 	//Background
 	void displayBackground();
-	void displayMinimap();
 	void updateCamera();
 	void centerCamera(int componentIndex);
+
+	//UI elements
+	void displayMinimap();
+	void displayDescription();
 	
 	//Entity management
 	int createEntity();
@@ -44,6 +47,7 @@ public:
 
 private:
 
+	//Gameplay
 	void cutTrees(int x, int y);
 
 	//Movement
@@ -67,6 +71,10 @@ private:
 	Sprite minimapSprite;
 	Sprite selectSprite;
 	Sprite mouseSprite;
+	Sprite descriptionSprite;
+
+	//Fonts
+	TTF_Font* lazy28;
 
 	//Maps
 	Map map;
@@ -83,11 +91,13 @@ private:
 	std::vector<Sprite> cSprites;
 	std::vector<entityType> cTypes;
 	std::vector<Sprite> cMinimapSprites;
+	std::vector<int> cTimers;
+	std::vector<std::string> cDescriptions;
 
 	bool findEntity(int index, entityType type);
 
 	//Selection
-	std::vector<int> selected;
+	int selected;
 	bool doneSelecting;
 	SDL_Point mouse;
 	SDL_Point mouseCoordinate;
@@ -101,5 +111,9 @@ private:
 	//Camera
 	int cameraVelX;
 	int cameraVelY;
+
+	//Time
+	int currentTime;
+	bool timePassing;
 };
 

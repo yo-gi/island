@@ -126,6 +126,36 @@ void Texture::render(int x, int y, SDL_Rect* srcRect)
 	SDL_RenderCopy(mainRenderer, texture, srcRect, &destRect);
 }
 
+bool Texture::textRender(std::string text, TTF_Font* font, int r, int g, int b)
+{
+	//Get rid of preexisting texture
+	destroy();
+	SDL_Color textColor = { r, g, b };
+	//Render text surface
+	SDL_Surface* textSurface = TTF_RenderText_Solid( font, text.c_str(), textColor );
+	if( textSurface == NULL )
+	{
+		printf( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );
+	}
+	else
+	{
+	//Create texture from surface pixels
+	texture =  SDL_CreateTextureFromSurface(mainRenderer, textSurface);
+	if( texture == NULL )
+	{
+		printf( "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError() );
+	}
+	else
+	{
+		//Get image dimensions
+		width = textSurface->w;
+		height = textSurface->h;
+	}
+	//Get rid of old surface
+	SDL_FreeSurface( textSurface ); }
+	return texture != NULL;
+}
+
 void Texture::setAlpha(Uint8 alpha)
 {
 	SDL_SetTextureAlphaMod(texture, alpha);

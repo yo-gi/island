@@ -49,6 +49,11 @@ void Sprite::animate(int x, int y)
 	baseTexture.render(x, y, &srcRect);
 }
 
+bool Sprite::textRender(std::string text, TTF_Font* font, int r, int g, int b)
+{
+	return baseTexture.textRender(text, font, r, g, b);
+}
+
 int Sprite::getWidth()
 {
 	return frame.w;

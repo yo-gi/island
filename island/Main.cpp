@@ -82,6 +82,7 @@ int main (int argc, char* args[]) {
 		game.animationSystem();
 		game.movementSystem();
 		game.displayMinimap();
+		game.displayDescription();
 
 		SDL_RenderPresent(mainRenderer);
 

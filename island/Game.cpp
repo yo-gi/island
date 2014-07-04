@@ -16,6 +16,8 @@ Game::Game()
 	cCoordinates.resize(MAX_ENTITIES);
 	cTypes.resize(MAX_ENTITIES);
 	cMinimapSprites.resize(MAX_ENTITIES);
+	cTimers.resize(MAX_ENTITIES);
+	cDescriptions.resize(MAX_ENTITIES);
 
 	pathMap.resize(MAX_TILES);
 
@@ -43,6 +45,9 @@ Game::Game()
 	clickEnd.y = 0;
 
 	doneSelecting = true;
+
+	currentTime = SDL_GetTicks();
+	timePassing = true;
 }
 
 Game::~Game()
@@ -89,6 +94,12 @@ bool Game::initialize()
 		return false;
 	}
 
+	if( TTF_Init() == -1 )
+	{
+		printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
+		return false;
+	}
+
 	SDL_SetRelativeMouseMode((SDL_bool)true);
 
 	return true;
@@ -116,6 +127,18 @@ bool Game::loadMedia()
 		cout << "Couldn't load minimap texture\n";
 		return false;
 	}
+	if (!descriptionSprite.initialize("images/description.png",
+	    DESCRIPTION_WIDTH, DESCRIPTION_HEIGHT, 1, 1))
+	{
+		cout << "Couldn't load description texture\n";
+		return false;
+	}
+	lazy28 = TTF_OpenFont( "Fonts/lazy.ttf", 28 );
+	if (lazy28 == NULL)
+	{
+		cout << "Couldn't load lazy font texture\n";
+		//return false;
+	}
 	return true;
 }
 
@@ -125,7 +148,9 @@ void Game::destruct()
 	SDL_DestroyRenderer(mainRenderer);
 	mainWindow = NULL;
 	mainRenderer = NULL;
+	lazy28=NULL;
 
+	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -153,6 +178,15 @@ void Game::displayMinimap()
 	}
 }
 
+void Game::displayDescription()
+{
+	descriptionSprite.animate(SCREEN_WIDTH - DESCRIPTION_WIDTH, MINIMAP_HEIGHT);
+	if(selected != NULL)
+	{
+		//call describe function
+	}
+}
+
 void Game::loadMap()
 {
 	if (!map.loadSector(1))
@@ -168,7 +202,8 @@ void Game::loadMap()
 		if (map.getType(i) == TILE_SAND) entityMap[i].terrain = SAND;
 		if (map.getType(i) == TILE_LAND) entityMap[i].terrain = LAND;
 
-		entityMap[i].index = -1;
+		entityMap[i].treeIndex = -1;
+		entityMap[i].heroIndex = -1;
 	}
 }
 
@@ -214,17 +249,15 @@ void Game::eventHandler(SDL_Event& event)
 		switch(event.key.keysym.sym)
 		{
 			case SDLK_SPACE:
-				if(!selected.empty())
+				if(selected != NULL)
 				{
-					//make better choices than selected.front
-					centerCamera(selected.front());
+					centerCamera(selected);
 				}
 				break;
 			case SDLK_c:
 				for(int i = 0; i < int(heroNums.size()); ++i)
 				{
-					cutTrees(cCoordinates[heroNums[i]].x,
-						cCoordinates[heroNums[i]].y);
+					cTimers[heroNums[i]] = SDL_GetTicks() + 1000;
 				}
 				break;
 		}
@@ -234,7 +267,7 @@ void Game::eventHandler(SDL_Event& event)
 	{
 		if (event.button.button == SDL_BUTTON_LEFT)
 		{
-			selected.clear();
+			selected = NULL;
 
 			doneSelecting = false;
 			clickStart.x = mouseCoordinate.x;
@@ -243,7 +276,7 @@ void Game::eventHandler(SDL_Event& event)
 			cout << "start: " << clickStart.x << ", " << clickStart.y << endl;
 		}
 
-		if (event.button.button == SDL_BUTTON_RIGHT)
+		if (event.button.button == SDL_BUTTON_RIGHT && selected != NULL)
 		{
 			assignDestinations(mouseCoordinate.x, mouseCoordinate.y);
 		}
@@ -260,8 +293,20 @@ void Game::eventHandler(SDL_Event& event)
 			cout << "end: " << clickEnd.x << ", " << clickEnd.y << ", ";
 
 			selectionSystem();
-			cout << selected.size() << endl;
+			cout << cDescriptions[selected] << endl;
+			descriptionSprite.textRender(cDescriptions[selected], lazy28, 0,0,0);
 
+		}
+	}
+	if(timePassing)
+	{
+		for(int i = 0; i < MAX_ENTITIES; ++i)
+		{
+			if(SDL_GetTicks() == cTimers[i])
+			{
+				cutTrees(cCoordinates[heroNums[i]].x,
+				cCoordinates[heroNums[i]].y);
+			}
 		}
 	}
 }
@@ -313,7 +358,7 @@ void Game::updatePosition(int index, int x, int y)
 
 	entityType tempType = cTypes[index];
 	entityMap[mapIndex].types.erase(tempType);
-	entityMap[mapIndex].index = -1;	
+	entityMap[mapIndex].heroIndex = -1;	
 
 	cCoordinates[index].x = x;
 	cCoordinates[index].y = y;
@@ -324,7 +369,7 @@ void Game::updatePosition(int index, int x, int y)
 		+ cCoordinates[index].x;
 
 	entityMap[mapIndex].types.insert(tempType);
-	entityMap[mapIndex].index = index;
+	entityMap[mapIndex].heroIndex = index;
 }
 
 void Game::createHero(int x, int y)
@@ -341,6 +386,8 @@ void Game::createHero(int x, int y)
 
 	cMinimapSprites[heroNum].initialize
 	("images/minimap_hero.png", 16, 16, 1, 1);
+
+	cDescriptions[heroNum] = "This is a hero!";
 
 	entityMap[y * LEVEL_WIDTH + x].types.insert(HERO);
 
@@ -363,7 +410,10 @@ void Game::createTree(int x, int y)
 	cSprites[treeNum].initialize("images/tree.png", 
 		32, 32, 1, 1);
 
+	cDescriptions[treeNum] = "This is a lowly plant";
+
 	entityMap[y * LEVEL_WIDTH + x].types.insert(TREE);
+	entityMap[y * LEVEL_WIDTH + x].treeIndex = treeNum;
 
 	cDestinations[treeNum].x = x;
 	cDestinations[treeNum].y = y;
@@ -445,7 +495,7 @@ void Game::selectionSystem()
 		{
 			if (findEntity(j * LEVEL_WIDTH + i, HERO))
 			{
-				selected.push_back(entityMap[j * LEVEL_WIDTH + i].index);
+				selected = entityMap[j * LEVEL_WIDTH + i].heroIndex;
 			}
 		}
 	}
@@ -537,51 +587,48 @@ void Game::calclulatePath(int startIndex, int heroIndex)
 
 void Game::assignDestinations(int x, int y)
 {
-	for (int i = 0; i < selected.size(); ++i)
-	{
 		for (int i = 0; i < LEVEL_WIDTH - x; ++i)
 		{
-			if (!collisionChecker(selected[i], x, y))
+			if (!collisionChecker(selected, x, y))
 			{
-				setDestination(selected[i], x, y);
+				setDestination(selected, x, y);
 				break;
 			}
-			else if (!collisionChecker(selected[i], x - i, y))
+			else if (!collisionChecker(selected, x - i, y))
 			{
-				setDestination(selected[i], x - i, y);
+				setDestination(selected, x - i, y);
 				break;
 			}
-			else if (!collisionChecker(selected[i], x + i, y))
+			else if (!collisionChecker(selected, x + i, y))
 			{
-				setDestination(selected[i], x + i, y);
+				setDestination(selected, x + i, y);
 				break;
 			}
-			else if (!collisionChecker(selected[i], x, y - i))
+			else if (!collisionChecker(selected, x, y - i))
 			{
-				setDestination(selected[i], x, y - i);
+				setDestination(selected, x, y - i);
 				break;
 			}
-			else if (!collisionChecker(selected[i], x, y + i))
+			else if (!collisionChecker(selected, x, y + i))
 			{
-				setDestination(selected[i], x, y + i);
+				setDestination(selected, x, y + i);
 				break;
 			}
-			else if (!collisionChecker(selected[i], x + i, y + i))
+			else if (!collisionChecker(selected, x + i, y + i))
 			{
-				setDestination(selected[i], x + i, y + i);
+				setDestination(selected, x + i, y + i);
 				break;
 			}
-			else if (!collisionChecker(selected[i], x - i, y - i))
+			else if (!collisionChecker(selected, x - i, y - i))
 			{
-				setDestination(selected[i], x - i, y - i);
+				setDestination(selected, x - i, y - i);
 				break;
 			}
 		}
 
-		int startIndex = cCoordinates[selected[i]].y * LEVEL_WIDTH + 
-						 cCoordinates[selected[i]].x;
-		calclulatePath(startIndex, selected[i]);
-	}
+		int startIndex = cCoordinates[selected].y * LEVEL_WIDTH + 
+						 cCoordinates[selected].x;
+		calclulatePath(startIndex, selected);
 }
 
 void Game::updateDestination(int index, int x, int y)
@@ -644,7 +691,7 @@ bool Game::collisionChecker(int index, int x, int y)
 	int mapIndex = y * LEVEL_WIDTH + x;
 	entityType type = cTypes[index];
 	
-	if (entityMap[mapIndex].index == index) return false;
+	if (entityMap[mapIndex].heroIndex == index) return false;
 	if (findEntity(mapIndex, type) || entityMap[mapIndex].terrain == WATER)
 	{
 		return true;
@@ -654,68 +701,78 @@ bool Game::collisionChecker(int index, int x, int y)
 
 void Game::cutTrees(int x, int y)
 {
+	cout << "-------" << endl;
+	cout << "1" << endl;
 	int i = y*LEVEL_WIDTH+x+1;
 	if(i < MAX_TILES)
 	{
 		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
-			destroyEntity(entityMap[i].index);
+			destroyEntity(entityMap[i].treeIndex);
 		}
 	}
+	cout << "1" << endl;
 	i = (y+1)*LEVEL_WIDTH+x+1;
 	if(i < MAX_TILES)
 	{
 		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
-			destroyEntity(entityMap[i].index);
+			destroyEntity(entityMap[i].treeIndex);
 		}
 	}
+	cout << "1" << endl;
 	i = (y-1)*LEVEL_WIDTH+x+1;
 	if(i < MAX_TILES)
 	{
 		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
-			destroyEntity(entityMap[i].index);
+			destroyEntity(entityMap[i].treeIndex);
 		}
 	}
+	cout << "1" << endl;
 	i = y*LEVEL_WIDTH+x-1;
 	if(i < MAX_TILES)
 	{
 		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
-			destroyEntity(entityMap[i].index);
+			destroyEntity(entityMap[i].treeIndex);
 		}
 	}
+	cout << "1" << endl;
 	i = (y+1)*LEVEL_WIDTH+x-1;
 	if(i < MAX_TILES)
 	{
 		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
-			destroyEntity(entityMap[i].index);
+			destroyEntity(entityMap[i].treeIndex);
 		}
 	}
+	cout << "1" << endl;
 	i = (y-1)*LEVEL_WIDTH+x-1;
 	if(i < MAX_TILES)
 	{
 		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
-			destroyEntity(entityMap[i].index);
+			destroyEntity(entityMap[i].treeIndex);
 		}
 	}
+	cout << "1" << endl;
 	i = (y+1)*LEVEL_WIDTH+x;
 	if(i < MAX_TILES)
 	{
 		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
-			destroyEntity(entityMap[i].index);
+			destroyEntity(entityMap[i].treeIndex);
 		}
 	}
+	cout << "1" << endl;
 	i = (y-1)*LEVEL_WIDTH+x;
 	if(i < MAX_TILES)
 	{
 		if(entityMap[i].types.find(TREE) != entityMap[i].types.end())
 		{
-			destroyEntity(entityMap[i].index);
+			destroyEntity(entityMap[i].treeIndex);
 		}
 	}
+	cout << "done" << endl;
 }

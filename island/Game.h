@@ -72,6 +72,7 @@ private:
 	Sprite selectSprite;
 	Sprite mouseSprite;
 	Sprite descriptionSprite;
+	Sprite descriptionTextSprite;
 
 	//Fonts
 	TTF_Font* lazy28;

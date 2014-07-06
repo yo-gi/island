@@ -45,6 +45,9 @@ Game::Game()
 	clickEnd.y = 0;
 
 	doneSelecting = true;
+	selected = NULL;
+
+	descriptionTextSprite.setSize(DESCRIPTION_WIDTH-20, 20);
 
 	currentTime = SDL_GetTicks();
 	timePassing = true;
@@ -133,6 +136,12 @@ bool Game::loadMedia()
 		cout << "Couldn't load description texture\n";
 		return false;
 	}
+	if (!descriptionTextSprite.initialize("images/description.png",
+	    DESCRIPTION_WIDTH-20, DESCRIPTION_HEIGHT/2, 1, 1))
+	{
+		cout << "Couldn't load description texture\n";
+		return false;
+	}
 	lazy28 = TTF_OpenFont( "Fonts/lazy.ttf", 28 );
 	if (lazy28 == NULL)
 	{
@@ -184,6 +193,8 @@ void Game::displayDescription()
 	if(selected != NULL)
 	{
 		//call describe function
+		descriptionTextSprite.animate(SCREEN_WIDTH - DESCRIPTION_WIDTH,
+		                              MINIMAP_HEIGHT+DESCRIPTION_OFFSET);
 	}
 }
 
@@ -276,7 +287,8 @@ void Game::eventHandler(SDL_Event& event)
 			cout << "start: " << clickStart.x << ", " << clickStart.y << endl;
 		}
 
-		if (event.button.button == SDL_BUTTON_RIGHT && selected != NULL)
+		if (event.button.button == SDL_BUTTON_RIGHT && selected != NULL
+		    && cTypes[selected]==HERO)
 		{
 			assignDestinations(mouseCoordinate.x, mouseCoordinate.y);
 		}
@@ -293,9 +305,15 @@ void Game::eventHandler(SDL_Event& event)
 			cout << "end: " << clickEnd.x << ", " << clickEnd.y << ", ";
 
 			selectionSystem();
-			cout << cDescriptions[selected] << endl;
-			descriptionSprite.textRender(cDescriptions[selected], lazy28, 0,0,0);
-
+			if(selected != NULL)
+			{
+				cout << cDescriptions[selected] << endl;
+				descriptionTextSprite.textRender(cDescriptions[selected], lazy28, 0,0,0);
+			}
+			else
+			{
+				descriptionTextSprite.setSize(DESCRIPTION_WIDTH-20, 20);
+			}
 		}
 	}
 	if(timePassing)
@@ -489,6 +507,7 @@ void Game::animationSystem()
 
 void Game::selectionSystem()
 {
+	selected = NULL;
 	for (int i = clickStart.x; i <= clickEnd.x; ++i)
 	{
 		for (int j = clickStart.y; j <= clickEnd.y; ++j)
@@ -496,6 +515,10 @@ void Game::selectionSystem()
 			if (findEntity(j * LEVEL_WIDTH + i, HERO))
 			{
 				selected = entityMap[j * LEVEL_WIDTH + i].heroIndex;
+			}
+			if (findEntity(j * LEVEL_WIDTH + i, TREE))
+			{
+				selected = entityMap[j * LEVEL_WIDTH + i].treeIndex;
 			}
 		}
 	}

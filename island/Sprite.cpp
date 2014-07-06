@@ -54,6 +54,13 @@ bool Sprite::textRender(std::string text, TTF_Font* font, int r, int g, int b)
 	return baseTexture.textRender(text, font, r, g, b);
 }
 
+void Sprite::setSize(int width, int height)
+{
+	//also blanks the image
+	//intended for text sizing
+	baseTexture.loadBlank(width, height);
+}
+
 int Sprite::getWidth()
 {
 	return frame.w;

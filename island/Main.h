@@ -36,6 +36,7 @@ const int MINIMAP_HEIGHT = 256;
 
 const int DESCRIPTION_WIDTH = 256;
 const int DESCRIPTION_HEIGHT = 192;
+const int DESCRIPTION_OFFSET = 64;
 
 const int MAX_TILE_TYPES = 3;
 const int MAX_TILES = LEVEL_HEIGHT * LEVEL_WIDTH;

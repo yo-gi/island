@@ -19,10 +19,10 @@ public:
 	void animate(int x, int y);
 	void setAlpha(Uint8 alpha);
 	bool textRender(std::string text, TTF_Font* font, int r, int g, int b);
+	void setSize(int width, int height);
 
 	int getWidth();
 	int getHeight();
-
 
 	SDL_Rect getBox();
 

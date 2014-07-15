@@ -44,6 +44,8 @@ public:
 	void eventHandler(SDL_Event& event);
 	void mouseHandler();
 
+	void updateTime();
+
 
 private:
 
@@ -115,6 +117,6 @@ private:
 
 	//Time
 	int currentTime;
-	bool timePassing;
+	int timePassed;
 };
 

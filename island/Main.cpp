@@ -57,6 +57,7 @@ int main (int argc, char* args[]) {
 
 	while (!quit)
 	{
+		game.updateTime();
 		while(SDL_PollEvent(&event) != 0)
 		{
 			switch(event.type)

@@ -41,6 +41,7 @@ const int DESCRIPTION_OFFSET = 64;
 const int MAX_TILE_TYPES = 3;
 const int MAX_TILES = LEVEL_HEIGHT * LEVEL_WIDTH;
 
+//these speeds are now in terms of pixels/second
 const int HERO_VEL = 1;
 const int CAMERA_VEL = 1;
 

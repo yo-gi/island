@@ -50,7 +50,6 @@ Game::Game()
 	descriptionTextSprite.setSize(DESCRIPTION_WIDTH-20, 20);
 
 	currentTime = SDL_GetTicks();
-	timePassing = true;
 }
 
 Game::~Game()
@@ -266,9 +265,9 @@ void Game::eventHandler(SDL_Event& event)
 				}
 				break;
 			case SDLK_c:
-				for(int i = 0; i < int(heroNums.size()); ++i)
+				if(selected != NULL)
 				{
-					cTimers[heroNums[i]] = SDL_GetTicks() + 1000;
+					cTimers[selected] = currentTime + 5000;
 				}
 				break;
 		}
@@ -291,6 +290,7 @@ void Game::eventHandler(SDL_Event& event)
 		    && cTypes[selected]==HERO)
 		{
 			assignDestinations(mouseCoordinate.x, mouseCoordinate.y);
+			cTimers[selected] = NULL;
 		}
 	}
 
@@ -308,22 +308,12 @@ void Game::eventHandler(SDL_Event& event)
 			if(selected != NULL)
 			{
 				cout << cDescriptions[selected] << endl;
+				//we may want to preload all this text
 				descriptionTextSprite.textRender(cDescriptions[selected], lazy28, 0,0,0);
 			}
 			else
 			{
 				descriptionTextSprite.setSize(DESCRIPTION_WIDTH-20, 20);
-			}
-		}
-	}
-	if(timePassing)
-	{
-		for(int i = 0; i < MAX_ENTITIES; ++i)
-		{
-			if(SDL_GetTicks() == cTimers[i])
-			{
-				cutTrees(cCoordinates[heroNums[i]].x,
-				cCoordinates[heroNums[i]].y);
 			}
 		}
 	}
@@ -477,6 +467,22 @@ bool Game::moveStep(int index, int destX, int destY)
 
 	if (curY == destY && curX == destX) return true;
 	else return false;
+}
+
+void Game:: updateTime()
+{
+	//change time
+	timePassed = SDL_GetTicks() - currentTime;
+	currentTime += timePassed;
+	//check timers
+	for(int i = 0; i < heroNums.size(); ++i)
+	{
+		if(currentTime >= cTimers[heroNums[i]] && cTimers[heroNums[i]] != NULL)
+		{
+			cutTrees(cCoordinates[heroNums[i]].x, cCoordinates[heroNums[i]].y);
+			cTimers[heroNums[i]] = NULL;
+		}
+	}
 }
 
 void Game::animationSystem()
